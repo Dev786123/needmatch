@@ -50,6 +50,8 @@ export default function ProfilePage() {
   };
 
   const saveProfile = async () => {
+    setMessage("");
+
     if (!name || !city || !phone) {
       setMessage("Please fill name, city and phone");
       return;
@@ -64,7 +66,7 @@ export default function ProfilePage() {
 
     const finalRole = profile?.role || role;
 
-    const { error } = await supabase.from("profiles").upsert([
+    const { error } = await supabase.from("profiles").upsert(
       {
         user_id: userData.user.id,
         name,
@@ -74,15 +76,19 @@ export default function ProfilePage() {
         city,
         phone,
       },
-    ]);
+      {
+        onConflict: "user_id",
+      }
+    );
 
     if (error) {
       setMessage(error.message);
-    } else {
-      setMessage("Profile saved successfully!");
-      await loadProfile();
-      setEditMode(false);
+      return;
     }
+
+    setMessage("Profile saved successfully!");
+    await loadProfile();
+    setEditMode(false);
   };
 
   useEffect(() => {
