@@ -8,48 +8,42 @@ export default function PostNeedPage() {
   const [budget, setBudget] = useState("");
   const [city, setCity] = useState("");
 
-  if (!title || !budget || !city) {
-  alert("Please fill all fields");
-  return;
-}
-
   const handleSubmit = async () => {
-  if (!title || !budget || !city) {
-    alert("Please fill all fields");
-    return;
-  }
+    if (!title || !budget || !city) {
+      alert("Please fill all fields");
+      return;
+    }
 
-  const { data: userData } = await supabase.auth.getUser();
+    const { data: userData } = await supabase.auth.getUser();
 
-  if (!userData.user) {
-    alert("Please login first");
-    window.location.href = "/login";
-    return;
-  }
+    if (!userData.user) {
+      alert("Please login first");
+      window.location.href = "/login";
+      return;
+    }
 
-  const { error } = await supabase.from("needs").insert([
-    {
-      title,
-      budget,
-      city,
-      user_id: userData.user.id,
-    },
-  ]);
+    const { error } = await supabase.from("needs").insert([
+      {
+        title,
+        budget,
+        city,
+        user_id: userData.user.id,
+      },
+    ]);
 
-  if (error) {
-    alert(error.message);
-  } else {
-    alert("Need posted successfully!");
-    setTitle("");
-    setBudget("");
-    setCity("");
-  }
-};
+    if (error) {
+      alert(error.message);
+    } else {
+      alert("Need posted successfully!");
+      setTitle("");
+      setBudget("");
+      setCity("");
+    }
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-
         <h2 className="text-2xl font-bold mb-6 text-center">
           Post Your Need
         </h2>
@@ -84,7 +78,6 @@ export default function PostNeedPage() {
         >
           Post Need
         </button>
-
       </div>
     </main>
   );
