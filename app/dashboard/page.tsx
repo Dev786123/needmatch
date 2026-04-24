@@ -28,15 +28,13 @@ export default function DashboardPage() {
         .eq("user_id", userData.user.id)
         .maybeSingle();
 
-      if (!profile?.role) {
-        window.location.href = "/profile";
-        return;
-      }
+      // ❌ REMOVE REDIRECT → ✅ ALWAYS STAY ON DASHBOARD
+      const userRole = profile?.role || "provider";
+      const isProfileComplete =
+        profile?.name && profile?.city && profile?.phone;
 
-      const isProfileComplete = profile.name && profile.city && profile.phone;
-
-      setRole(profile.role);
-      setName(profile.name || "there");
+      setRole(userRole);
+      setName(profile?.name || "there");
       setShowProfilePopup(!isProfileComplete);
       setLoading(false);
     };
@@ -104,6 +102,7 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
+      {/* ✅ PROFILE POPUP */}
       {showProfilePopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-md rounded-3xl bg-white p-7 shadow-xl">
@@ -134,6 +133,7 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* HERO */}
       <section className="bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 px-6 py-16 text-white">
         <div className="mx-auto max-w-6xl">
           <p className="mb-3 text-blue-100">
@@ -142,7 +142,9 @@ export default function DashboardPage() {
 
           <h1 className="text-4xl font-black md:text-5xl">
             Welcome {name},{" "}
-            {role === "client" ? "manage your hiring." : "find your next work."}
+            {role === "client"
+              ? "manage your hiring."
+              : "find your next work."}
           </h1>
 
           <p className="mt-4 max-w-2xl text-blue-100">
@@ -153,6 +155,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* BODY */}
       <section className="mx-auto max-w-6xl px-6 py-10">
         {loginSuccess && (
           <p className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700">
@@ -185,15 +188,13 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="mb-6 flex items-end justify-between">
-          <div>
-            <h2 className="text-3xl font-black text-slate-950">
-              Quick Actions
-            </h2>
-            <p className="mt-1 text-slate-600">
-              Choose the action that matches your role.
-            </p>
-          </div>
+        <div className="mb-6">
+          <h2 className="text-3xl font-black text-slate-950">
+            Quick Actions
+          </h2>
+          <p className="mt-1 text-slate-600">
+            Choose the action that matches your role.
+          </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
