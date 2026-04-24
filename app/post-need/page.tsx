@@ -10,14 +10,14 @@ export default function PostNeedPage() {
 
   const handleSubmit = async () => {
     if (!title || !budget || !city) {
-      alert("Please fill all fields");
+      window.alert("Please fill all fields");
       return;
     }
 
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      alert("Please login first");
+      window.alert("Please login first");
       window.location.href = "/login";
       return;
     }
@@ -32,9 +32,9 @@ export default function PostNeedPage() {
     ]);
 
     if (error) {
-      alert(error.message);
+      window.alert(error.message);
     } else {
-      alert("Need posted successfully!");
+      window.alert("Need posted successfully!");
       setTitle("");
       setBudget("");
       setCity("");
