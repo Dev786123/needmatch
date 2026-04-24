@@ -33,7 +33,7 @@ export default function LoginPage() {
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
         {message && (
-          <p className="text-center text-sm text-blue-600 mb-4">
+          <p className="mb-4 text-center text-sm text-blue-600">
             {message}
           </p>
         )}

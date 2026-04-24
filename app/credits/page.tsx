@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase";
 
 export default function CreditsPage() {
   const [balance, setBalance] = useState(0);
+  const [message, setMessage] = useState("");
 
   const loadCredits = async () => {
     const { data: userData } = await supabase.auth.getUser();
@@ -43,10 +44,10 @@ export default function CreditsPage() {
     ]);
 
     if (error) {
-      console.log(error.message);
+      setMessage(error.message);
     } else {
       setBalance(newBalance);
-      console.log("5 demo credits added!");
+      setMessage("5 demo credits added!");
     }
   };
 
@@ -58,6 +59,12 @@ export default function CreditsPage() {
     <main className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-md mx-auto bg-white p-6 rounded-xl shadow">
         <h1 className="text-2xl font-bold mb-4">Credits</h1>
+
+        {message && (
+          <p className="mb-4 text-center text-sm text-blue-600">
+            {message}
+          </p>
+        )}
 
         <p className="text-lg mb-6">
           Current Balance: <strong>{balance}</strong>

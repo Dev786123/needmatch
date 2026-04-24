@@ -10,37 +10,39 @@ export default function ApplyPage() {
 
   const [proposal, setProposal] = useState("");
   const [bid, setBid] = useState("");
+  const [message, setMessage] = useState("");
 
-  if (!proposal || !bid) {
-  console.log("Please fill proposal and bid");
-  return;
-}
   const handleApply = async () => {
-  const { data: userData } = await supabase.auth.getUser();
+    if (!proposal || !bid) {
+      setMessage("Please fill proposal and bid");
+      return;
+    }
 
-  if (!userData.user) {
-    console.log("Please login first");
-    window.location.href = "/login";
-    return;
-  }
+    const { data: userData } = await supabase.auth.getUser();
 
-  const { error } = await supabase.from("applications").insert([
-    {
-      need_id: needId,
-      proposal,
-      bid,
-      provider_id: userData.user.id,
-    },
-  ]);
+    if (!userData.user) {
+      setMessage("Please login first");
+      window.location.href = "/login";
+      return;
+    }
 
-  if (error) {
-    console.log(error.message);
-  } else {
-    console.log("Application submitted successfully!");
-    setProposal("");
-    setBid("");
-  }
-};
+    const { error } = await supabase.from("applications").insert([
+      {
+        need_id: needId,
+        proposal,
+        bid,
+        provider_id: userData.user.id,
+      },
+    ]);
+
+    if (error) {
+      setMessage(error.message);
+    } else {
+      setMessage("Application submitted successfully!");
+      setProposal("");
+      setBid("");
+    }
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -48,6 +50,12 @@ export default function ApplyPage() {
         <h2 className="text-2xl font-bold mb-6 text-center">
           Apply to Need
         </h2>
+
+        {message && (
+          <p className="mb-4 text-center text-sm text-blue-600">
+            {message}
+          </p>
+        )}
 
         <textarea
           placeholder="Write your proposal"

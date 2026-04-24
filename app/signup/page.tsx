@@ -6,17 +6,25 @@ import { supabase } from "../../lib/supabase";
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSignup = async () => {
-    const { data, error } = await supabase.auth.signUp({
+    if (!email || !password) {
+      setMessage("Please enter email and password");
+      return;
+    }
+
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (error) {
-      console.log(error.message);
+      setMessage(error.message);
     } else {
-      console.log("Signup successful! Check your email.");
+      setMessage("Signup successful! Please login now.");
+      setEmail("");
+      setPassword("");
     }
   };
 
@@ -26,6 +34,12 @@ export default function SignupPage() {
         <h2 className="text-2xl font-bold mb-6 text-center">
           Create Account
         </h2>
+
+        {message && (
+          <p className="mb-4 text-center text-sm text-blue-600">
+            {message}
+          </p>
+        )}
 
         <input
           type="email"
