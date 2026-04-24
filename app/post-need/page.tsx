@@ -5,6 +5,8 @@ import { supabase } from "../../lib/supabase";
 
 export default function PostNeedPage() {
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
   const [budget, setBudget] = useState("");
   const [city, setCity] = useState("");
   const [message, setMessage] = useState("");
@@ -20,11 +22,13 @@ export default function PostNeedPage() {
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profiles } = await supabase
         .from("profiles")
         .select("role")
         .eq("user_id", userData.user.id)
-        .maybeSingle();
+        .limit(1);
+
+      const profile = profiles && profiles.length > 0 ? profiles[0] : null;
 
       if (profile?.role !== "client") {
         window.location.href = "/dashboard";
@@ -38,7 +42,9 @@ export default function PostNeedPage() {
   }, []);
 
   const handleSubmit = async () => {
-    if (!title || !budget || !city) {
+    setMessage("");
+
+    if (!title || !description || !category || !budget || !city) {
       setMessage("Please fill all fields");
       return;
     }
@@ -52,11 +58,13 @@ export default function PostNeedPage() {
       return;
     }
 
-    const { data: profile } = await supabase
+    const { data: profiles } = await supabase
       .from("profiles")
       .select("role")
       .eq("user_id", userData.user.id)
-      .maybeSingle();
+      .limit(1);
+
+    const profile = profiles && profiles.length > 0 ? profiles[0] : null;
 
     if (profile?.role !== "client") {
       window.location.href = "/dashboard";
@@ -65,22 +73,28 @@ export default function PostNeedPage() {
 
     const { error } = await supabase.from("needs").insert([
       {
+        client_id: userData.user.id,
         title,
+        description,
+        category,
         budget,
         city,
-        user_id: userData.user.id,
+        status: "open",
       },
     ]);
 
     if (error) {
       setMessage(error.message);
-    } else {
-      setMessage("Need posted successfully!");
-      setTitle("");
-      setBudget("");
-      setCity("");
+      setSubmitting(false);
+      return;
     }
 
+    setMessage("Need posted successfully!");
+    setTitle("");
+    setDescription("");
+    setCategory("");
+    setBudget("");
+    setCity("");
     setSubmitting(false);
   };
 
@@ -127,6 +141,27 @@ export default function PostNeedPage() {
           />
 
           <label className="block mb-2 font-medium text-slate-700">
+            Description
+          </label>
+          <textarea
+            placeholder="Explain your requirement..."
+            className="w-full border p-3 mb-5 rounded-lg h-32"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+
+          <label className="block mb-2 font-medium text-slate-700">
+            Category
+          </label>
+          <input
+            type="text"
+            placeholder="Example: Website Development"
+            className="w-full border p-3 mb-5 rounded-lg"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          />
+
+          <label className="block mb-2 font-medium text-slate-700">
             Budget
           </label>
           <input
@@ -137,9 +172,7 @@ export default function PostNeedPage() {
             onChange={(e) => setBudget(e.target.value)}
           />
 
-          <label className="block mb-2 font-medium text-slate-700">
-            City
-          </label>
+          <label className="block mb-2 font-medium text-slate-700">City</label>
           <input
             type="text"
             placeholder="Example: Surat"
@@ -151,7 +184,7 @@ export default function PostNeedPage() {
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
           >
             {submitting ? "Posting..." : "Post Need"}
           </button>

@@ -6,14 +6,18 @@ import { supabase } from "../../../lib/supabase";
 
 export default function NeedDetailPage() {
   const params = useParams();
-  const needId = params.id;
+  const needId = params.id as string;
 
   const [need, setNeed] = useState<any>(null);
+  const [application, setApplication] = useState<any>(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadNeedDetail = async () => {
+      setLoading(true);
+      setMessage("");
+
       const { data: userData } = await supabase.auth.getUser();
 
       if (!userData.user) {
@@ -21,29 +25,59 @@ export default function NeedDetailPage() {
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profileRows } = await supabase
         .from("profiles")
         .select("role")
         .eq("user_id", userData.user.id)
-        .maybeSingle();
+        .limit(1);
+
+      const profile =
+        profileRows && profileRows.length > 0 ? profileRows[0] : null;
 
       if (profile?.role !== "provider") {
         window.location.href = "/dashboard";
         return;
       }
 
-      const { data, error } = await supabase
+      const { data: needRows, error: needError } = await supabase
         .from("needs")
         .select("*")
         .eq("id", needId)
-        .maybeSingle();
+        .limit(1);
 
-      if (error) {
-        setMessage(error.message);
-      } else {
-        setNeed(data);
+      if (needError) {
+        setMessage(needError.message);
+        setLoading(false);
+        return;
       }
 
+      const currentNeed = needRows && needRows.length > 0 ? needRows[0] : null;
+
+      if (!currentNeed) {
+        setMessage("Need not found.");
+        setLoading(false);
+        return;
+      }
+
+      setNeed(currentNeed);
+
+      const { data: appRows, error: appError } = await supabase
+        .from("applications")
+        .select("*")
+        .eq("need_id", needId)
+        .eq("provider_id", userData.user.id)
+        .limit(1);
+
+      if (appError) {
+        setMessage(appError.message);
+        setLoading(false);
+        return;
+      }
+
+      const currentApplication =
+        appRows && appRows.length > 0 ? appRows[0] : null;
+
+      setApplication(currentApplication);
       setLoading(false);
     };
 
@@ -58,18 +92,30 @@ export default function NeedDetailPage() {
     );
   }
 
+  const isOpen = need?.status === "open";
+  const alreadyApplied = !!application;
+
   return (
     <main className="min-h-screen bg-slate-50">
       <section className="bg-white border-b px-6 py-12">
         <div className="mx-auto max-w-5xl">
-          <a href="/needs" className="font-semibold text-blue-600 hover:underline">
+          <a
+            href="/needs"
+            className="font-semibold text-blue-600 hover:underline"
+          >
             ← Back to Browse Needs
           </a>
 
           <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
-              <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
-                Open Requirement
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${
+                  isOpen
+                    ? "bg-green-50 text-green-700"
+                    : "bg-red-50 text-red-700"
+                }`}
+              >
+                {need?.status || "closed"} Requirement
               </span>
 
               <h1 className="mt-4 text-4xl font-extrabold text-slate-950">
@@ -77,16 +123,26 @@ export default function NeedDetailPage() {
               </h1>
 
               <p className="mt-3 text-slate-600">
-                Review the requirement and submit your proposal if it matches your skills.
+                Review the requirement and submit your proposal if it matches
+                your skills.
               </p>
             </div>
 
-            {need && (
+            {need && isOpen && !alreadyApplied && (
               <a
                 href={`/apply/${need.id}`}
                 className="rounded-xl bg-blue-600 px-6 py-3 text-center font-semibold text-white hover:bg-blue-700"
               >
                 Apply Now
+              </a>
+            )}
+
+            {need && alreadyApplied && (
+              <a
+                href="/my-applications"
+                className="rounded-xl bg-slate-900 px-6 py-3 text-center font-semibold text-white hover:bg-slate-800"
+              >
+                View Application
               </a>
             )}
           </div>
@@ -119,24 +175,72 @@ export default function NeedDetailPage() {
 
               <div className="rounded-2xl bg-slate-50 p-5">
                 <p className="text-xs font-medium text-slate-500">Status</p>
-                <h2 className="mt-1 text-2xl font-bold text-green-700">
-                  Open
+                <h2
+                  className={`mt-1 text-2xl font-bold capitalize ${
+                    isOpen ? "text-green-700" : "text-red-700"
+                  }`}
+                >
+                  {need.status || "closed"}
                 </h2>
               </div>
             </div>
 
+            {need.category && (
+              <div className="mt-6 rounded-2xl border p-5">
+                <p className="text-sm font-semibold text-slate-500">
+                  Category
+                </p>
+                <p className="mt-1 text-slate-700">{need.category}</p>
+              </div>
+            )}
+
+            {need.description && (
+              <div className="mt-6 rounded-2xl border p-5">
+                <p className="text-sm font-semibold text-slate-500">
+                  Description
+                </p>
+                <p className="mt-1 text-slate-700">{need.description}</p>
+              </div>
+            )}
+
             <div className="mt-6 rounded-2xl border p-5">
               <p className="text-sm font-semibold text-slate-500">Posted At</p>
-              <p className="mt-1 text-slate-700">{need.created_at}</p>
+              <p className="mt-1 text-slate-700">
+                {need.created_at
+                  ? new Date(need.created_at).toLocaleString()
+                  : "Not available"}
+              </p>
             </div>
 
+            {alreadyApplied && (
+              <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-5">
+                <p className="text-sm font-semibold text-blue-700">
+                  Your Application Status
+                </p>
+                <p className="mt-1 font-bold capitalize text-blue-900">
+                  {application.status || "pending"}
+                </p>
+              </div>
+            )}
+
             <div className="mt-6 flex flex-wrap gap-3">
-              <a
-                href={`/apply/${need.id}`}
-                className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
-              >
-                Apply Now
-              </a>
+              {isOpen && !alreadyApplied && (
+                <a
+                  href={`/apply/${need.id}`}
+                  className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+                >
+                  Apply Now
+                </a>
+              )}
+
+              {alreadyApplied && (
+                <a
+                  href="/my-applications"
+                  className="rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-800"
+                >
+                  View My Application
+                </a>
+              )}
 
               <a
                 href="/needs"

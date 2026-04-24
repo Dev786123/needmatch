@@ -28,10 +28,11 @@ export default function ProfilePage() {
       return;
     }
 
-    const { data, error } = await supabase
+    const { data: profiles, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userData.user.id)
+      .order("created_at", { ascending: true })
       .limit(1);
 
     if (error) {
@@ -40,7 +41,7 @@ export default function ProfilePage() {
       return;
     }
 
-    const userProfile = data && data.length > 0 ? data[0] : null;
+    const userProfile = profiles && profiles.length > 0 ? profiles[0] : null;
 
     if (userProfile) {
       setProfile(userProfile);
@@ -57,6 +58,7 @@ export default function ProfilePage() {
       setEditMode(!isComplete);
     } else {
       setProfile(null);
+      setRole("provider");
       setEditMode(true);
     }
 
@@ -78,7 +80,7 @@ export default function ProfilePage() {
       return;
     }
 
-    const finalRole = profile?.role || role;
+    const finalRole = profile?.role || role || "provider";
 
     const profileData = {
       user_id: userData.user.id,
@@ -92,15 +94,16 @@ export default function ProfilePage() {
 
     let error;
 
-    if (profile) {
+    if (profile?.id) {
       const result = await supabase
         .from("profiles")
         .update(profileData)
-        .eq("user_id", userData.user.id);
+        .eq("id", profile.id);
 
       error = result.error;
     } else {
       const result = await supabase.from("profiles").insert([profileData]);
+
       error = result.error;
     }
 

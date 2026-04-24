@@ -10,6 +10,9 @@ export default function CreditsPage() {
   const [adding, setAdding] = useState(false);
 
   const loadCredits = async () => {
+    setLoading(true);
+    setMessage("");
+
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
@@ -17,31 +20,63 @@ export default function CreditsPage() {
       return;
     }
 
-    const { data: profile } = await supabase
+    const { data: profileRows } = await supabase
       .from("profiles")
       .select("role")
       .eq("user_id", userData.user.id)
-      .maybeSingle();
+      .limit(1);
+
+    const profile =
+      profileRows && profileRows.length > 0 ? profileRows[0] : null;
 
     if (profile?.role !== "client") {
       window.location.href = "/dashboard";
       return;
     }
 
-    const { data, error } = await supabase
+    const { data: creditRows, error } = await supabase
       .from("credits")
       .select("*")
       .eq("user_id", userData.user.id)
-      .maybeSingle();
+      .limit(1);
 
-    if (error) setMessage(error.message);
-    if (data) setBalance(data.balance || 0);
+    if (error) {
+      setMessage(error.message);
+      setLoading(false);
+      return;
+    }
 
+    let creditData =
+      creditRows && creditRows.length > 0 ? creditRows[0] : null;
+
+    if (!creditData) {
+      const { data: newCreditRows, error: createError } = await supabase
+        .from("credits")
+        .insert([
+          {
+            user_id: userData.user.id,
+            balance: 5,
+          },
+        ])
+        .select("*");
+
+      if (createError) {
+        setMessage(createError.message);
+        setLoading(false);
+        return;
+      }
+
+      creditData =
+        newCreditRows && newCreditRows.length > 0 ? newCreditRows[0] : null;
+    }
+
+    setBalance(creditData?.balance || 0);
     setLoading(false);
   };
 
   const addCredits = async () => {
     setAdding(true);
+    setMessage("");
 
     const { data: userData } = await supabase.auth.getUser();
 
@@ -50,11 +85,14 @@ export default function CreditsPage() {
       return;
     }
 
-    const { data: profile } = await supabase
+    const { data: profileRows } = await supabase
       .from("profiles")
       .select("role")
       .eq("user_id", userData.user.id)
-      .maybeSingle();
+      .limit(1);
+
+    const profile =
+      profileRows && profileRows.length > 0 ? profileRows[0] : null;
 
     if (profile?.role !== "client") {
       window.location.href = "/dashboard";
@@ -63,20 +101,45 @@ export default function CreditsPage() {
 
     const newBalance = balance + 5;
 
-    const { error } = await supabase.from("credits").upsert([
-      {
-        user_id: userData.user.id,
-        balance: newBalance,
-      },
-    ]);
+    const { data: creditRows } = await supabase
+      .from("credits")
+      .select("*")
+      .eq("user_id", userData.user.id)
+      .limit(1);
+
+    const creditData =
+      creditRows && creditRows.length > 0 ? creditRows[0] : null;
+
+    let error;
+
+    if (creditData?.id) {
+      const result = await supabase
+        .from("credits")
+        .update({
+          balance: newBalance,
+        })
+        .eq("id", creditData.id);
+
+      error = result.error;
+    } else {
+      const result = await supabase.from("credits").insert([
+        {
+          user_id: userData.user.id,
+          balance: newBalance,
+        },
+      ]);
+
+      error = result.error;
+    }
 
     if (error) {
       setMessage(error.message);
-    } else {
-      setBalance(newBalance);
-      setMessage("5 demo credits added!");
+      setAdding(false);
+      return;
     }
 
+    setBalance(newBalance);
+    setMessage("5 demo credits added!");
     setAdding(false);
   };
 
@@ -96,8 +159,16 @@ export default function CreditsPage() {
     <main className="min-h-screen bg-slate-50">
       <section className="bg-white border-b px-6 py-10">
         <div className="max-w-4xl mx-auto">
-          <p className="text-blue-600 font-medium mb-2">Client Monetization</p>
+          <a href="/dashboard" className="text-blue-600 font-medium">
+            ← Back to Dashboard
+          </a>
+
+          <p className="text-blue-600 font-medium mt-5 mb-2">
+            Client Monetization
+          </p>
+
           <h1 className="text-4xl font-bold text-slate-900 mb-3">Credits</h1>
+
           <p className="text-slate-600">
             Use credits to unlock provider contact details.
           </p>
@@ -122,6 +193,7 @@ export default function CreditsPage() {
             <h3 className="font-bold text-slate-900 mb-2">
               Demo Credit Pack
             </h3>
+
             <p className="text-slate-600 mb-4">
               Add 5 demo credits for testing contact unlock flow.
             </p>
@@ -129,7 +201,7 @@ export default function CreditsPage() {
             <button
               onClick={addCredits}
               disabled={adding}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-60"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {adding ? "Adding..." : "Add 5 Demo Credits"}
             </button>
@@ -140,7 +212,8 @@ export default function CreditsPage() {
               Real Payment Later
             </h3>
             <p className="text-slate-600 text-sm">
-              Later this will connect with Razorpay or WhatsApp manual payment.
+              Later this will connect with Razorpay. For now, demo credits keep
+              the unlock flow working.
             </p>
           </div>
         </div>

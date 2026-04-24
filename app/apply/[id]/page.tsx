@@ -6,10 +6,11 @@ import { useParams } from "next/navigation";
 
 export default function ApplyPage() {
   const params = useParams();
-  const needId = params.id;
+  const needId = params.id as string;
 
+  const [need, setNeed] = useState<any>(null);
   const [proposal, setProposal] = useState("");
-  const [bid, setBid] = useState("");
+  const [price, setPrice] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -17,6 +18,9 @@ export default function ApplyPage() {
 
   useEffect(() => {
     const checkUserRoleAndApplication = async () => {
+      setLoading(true);
+      setMessage("");
+
       const { data: userData } = await supabase.auth.getUser();
 
       if (!userData.user) {
@@ -24,23 +28,58 @@ export default function ApplyPage() {
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profileRows } = await supabase
         .from("profiles")
         .select("role")
         .eq("user_id", userData.user.id)
-        .maybeSingle();
+        .limit(1);
+
+      const profile =
+        profileRows && profileRows.length > 0 ? profileRows[0] : null;
 
       if (profile?.role !== "provider") {
         window.location.href = "/dashboard";
         return;
       }
 
-      const { data: existingApplication } = await supabase
+      const { data: needData, error: needError } = await supabase
+        .from("needs")
+        .select("*")
+        .eq("id", needId)
+        .limit(1);
+
+      if (needError) {
+        setMessage(needError.message);
+        setLoading(false);
+        return;
+      }
+
+      const currentNeed =
+        needData && needData.length > 0 ? needData[0] : null;
+
+      if (!currentNeed) {
+        setMessage("Need not found.");
+        setLoading(false);
+        return;
+      }
+
+      if (currentNeed.status !== "open") {
+        setMessage("This need is closed.");
+        setLoading(false);
+        return;
+      }
+
+      setNeed(currentNeed);
+
+      const { data: existingRows } = await supabase
         .from("applications")
         .select("*")
         .eq("need_id", needId)
         .eq("provider_id", userData.user.id)
-        .maybeSingle();
+        .limit(1);
+
+      const existingApplication =
+        existingRows && existingRows.length > 0 ? existingRows[0] : null;
 
       if (existingApplication) {
         setAlreadyApplied(true);
@@ -54,8 +93,10 @@ export default function ApplyPage() {
   }, [needId]);
 
   const handleApply = async () => {
-    if (!proposal || !bid) {
-      setMessage("Please fill proposal and bid");
+    setMessage("");
+
+    if (!proposal || !price) {
+      setMessage("Please fill proposal and price");
       return;
     }
 
@@ -68,14 +109,31 @@ export default function ApplyPage() {
       return;
     }
 
-    const { data: profile } = await supabase
+    const { data: profileRows } = await supabase
       .from("profiles")
       .select("role")
       .eq("user_id", userData.user.id)
-      .maybeSingle();
+      .limit(1);
+
+    const profile =
+      profileRows && profileRows.length > 0 ? profileRows[0] : null;
 
     if (profile?.role !== "provider") {
       window.location.href = "/dashboard";
+      return;
+    }
+
+    const { data: existingRows } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("need_id", needId)
+      .eq("provider_id", userData.user.id)
+      .limit(1);
+
+    if (existingRows && existingRows.length > 0) {
+      setAlreadyApplied(true);
+      setMessage("You have already applied to this need.");
+      setSubmitting(false);
       return;
     }
 
@@ -83,20 +141,22 @@ export default function ApplyPage() {
       {
         need_id: needId,
         proposal,
-        bid,
+        price,
         provider_id: userData.user.id,
+        status: "pending",
       },
     ]);
 
     if (error) {
       setMessage(error.message);
-    } else {
-      setMessage("Application submitted successfully!");
-      setProposal("");
-      setBid("");
-      setAlreadyApplied(true);
+      setSubmitting(false);
+      return;
     }
 
+    setMessage("Application submitted successfully!");
+    setProposal("");
+    setPrice("");
+    setAlreadyApplied(true);
     setSubmitting(false);
   };
 
@@ -121,12 +181,45 @@ export default function ApplyPage() {
           </h1>
 
           <p className="text-slate-600">
-            Send a clear proposal and bid amount to increase your chances.
+            Send a clear proposal and price amount to increase your chances.
           </p>
         </div>
       </section>
 
       <section className="max-w-4xl mx-auto px-6 py-8">
+        {need && (
+          <div className="mb-6 bg-white rounded-2xl shadow-sm border p-6">
+            <h2 className="text-2xl font-bold text-slate-900">
+              {need.title}
+            </h2>
+
+            <p className="mt-2 text-slate-600">{need.description}</p>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="rounded-xl bg-slate-50 p-3">
+                <p className="text-xs text-slate-500">Category</p>
+                <p className="font-bold text-slate-900">
+                  {need.category || "Not mentioned"}
+                </p>
+              </div>
+
+              <div className="rounded-xl bg-slate-50 p-3">
+                <p className="text-xs text-slate-500">Budget</p>
+                <p className="font-bold text-slate-900">
+                  {need.budget || "Not mentioned"}
+                </p>
+              </div>
+
+              <div className="rounded-xl bg-slate-50 p-3">
+                <p className="text-xs text-slate-500">City</p>
+                <p className="font-bold text-slate-900">
+                  {need.city || "Not mentioned"}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl shadow-sm border p-6">
           {message && (
             <p className="mb-4 text-sm text-blue-600 bg-blue-50 border border-blue-200 p-3 rounded-lg">
@@ -134,7 +227,7 @@ export default function ApplyPage() {
             </p>
           )}
 
-          {!alreadyApplied && (
+          {!alreadyApplied && need && need.status === "open" && (
             <>
               <label className="block mb-2 font-medium text-slate-700">
                 Your Proposal
@@ -148,21 +241,21 @@ export default function ApplyPage() {
               />
 
               <label className="block mb-2 font-medium text-slate-700">
-                Your Bid Amount
+                Your Price
               </label>
 
               <input
                 type="text"
                 placeholder="Example: ₹4000"
                 className="w-full border p-3 mb-6 rounded-lg"
-                value={bid}
-                onChange={(e) => setBid(e.target.value)}
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
               />
 
               <button
                 onClick={handleApply}
                 disabled={submitting}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
               >
                 {submitting ? "Submitting..." : "Submit Application"}
               </button>
