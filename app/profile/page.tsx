@@ -4,12 +4,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function ProfilePage() {
+  const [profile, setProfile] = useState<any>(null);
+  const [editMode, setEditMode] = useState(false);
+
   const [name, setName] = useState("");
   const [role, setRole] = useState("provider");
   const [skill, setSkill] = useState("");
   const [bio, setBio] = useState("");
   const [city, setCity] = useState("");
   const [phone, setPhone] = useState("");
+
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -21,21 +25,25 @@ export default function ProfilePage() {
       return;
     }
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userData.user.id)
       .maybeSingle();
 
-    if (error) setMessage(error.message);
-
     if (data) {
+      setProfile(data);
+
       setName(data.name || "");
       setRole(data.role || "provider");
       setSkill(data.skill || "");
       setBio(data.bio || "");
       setCity(data.city || "");
       setPhone(data.phone || "");
+
+      setEditMode(false); // show view mode
+    } else {
+      setEditMode(true); // first time → open form
     }
 
     setLoading(false);
@@ -43,17 +51,16 @@ export default function ProfilePage() {
 
   const saveProfile = async () => {
     if (!name || !city || !phone) {
-      setMessage("Please fill name, city and phone");
+      setMessage("Please fill required fields");
       return;
     }
 
-    const { data: userData } = await supabase.auth.getUser();
+const { data: userData } = await supabase.auth.getUser();
 
-    if (!userData.user) {
-      window.location.href = "/login";
-      return;
-    }
-
+if (!userData?.user) {
+  setMessage("User not found. Please login again.");
+  return;
+} 
     const { error } = await supabase.from("profiles").upsert([
       {
         user_id: userData.user.id,
@@ -69,7 +76,8 @@ export default function ProfilePage() {
     if (error) {
       setMessage(error.message);
     } else {
-      setMessage("Profile saved successfully!");
+      setMessage("Profile saved!");
+      loadProfile(); // reload and switch to view mode
     }
   };
 
@@ -80,97 +88,110 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-slate-50">
-        <p className="text-slate-600">Loading profile...</p>
+        Loading...
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <section className="bg-white border-b px-6 py-10">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">
-            My Profile
-          </h1>
-          <p className="text-slate-600">
-            Update your details to build trust and get more responses.
+    <main className="min-h-screen bg-slate-50 flex justify-center p-6">
+      <div className="bg-white p-8 rounded-2xl shadow w-full max-w-md">
+
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          My Profile
+        </h1>
+
+        {message && (
+          <p className="mb-4 text-sm text-blue-600 text-center">
+            {message}
           </p>
-        </div>
-      </section>
+        )}
 
-      {/* Form */}
-      <section className="max-w-4xl mx-auto px-6 py-8">
-        <div className="bg-white rounded-2xl shadow-sm border p-6">
+        {/* 🔥 VIEW MODE */}
+        {!editMode && profile && (
+          <>
+            <p><strong>Name:</strong> {profile.name}</p>
+            <p><strong>Role:</strong> {profile.role}</p>
 
-          {message && (
-            <p className="mb-4 text-sm text-blue-600 bg-blue-50 border border-blue-200 p-3 rounded-lg">
-              {message}
-            </p>
-          )}
+            {profile.role === "provider" && (
+              <p><strong>Skill:</strong> {profile.skill}</p>
+            )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <p><strong>Bio:</strong> {profile.bio}</p>
+            <p><strong>City:</strong> {profile.city}</p>
+            <p><strong>Phone:</strong> {profile.phone}</p>
+
+            <button
+              onClick={() => setEditMode(true)}
+              className="mt-6 w-full bg-blue-600 text-white py-2 rounded"
+            >
+              Edit Profile
+            </button>
+          </>
+        )}
+
+        {/* 🔥 EDIT MODE */}
+        {editMode && (
+          <>
             <input
               type="text"
               placeholder="Full Name"
-              className="border p-3 rounded-lg"
+              className="w-full border p-2 mb-3 rounded"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
 
             <select
-              className="border p-3 rounded-lg"
+              className="w-full border p-2 mb-3 rounded"
               value={role}
               onChange={(e) => setRole(e.target.value)}
             >
               <option value="client">Client</option>
               <option value="provider">Provider</option>
             </select>
-          </div>
 
-          {role === "provider" && (
-            <input
-              type="text"
-              placeholder="Skill (e.g. Web Developer)"
-              className="w-full border p-3 rounded-lg mb-4"
-              value={skill}
-              onChange={(e) => setSkill(e.target.value)}
+            {role === "provider" && (
+              <input
+                type="text"
+                placeholder="Skill"
+                className="w-full border p-2 mb-3 rounded"
+                value={skill}
+                onChange={(e) => setSkill(e.target.value)}
+              />
+            )}
+
+            <textarea
+              placeholder="Bio"
+              className="w-full border p-2 mb-3 rounded"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
             />
-          )}
 
-          <textarea
-            placeholder="Short Bio"
-            className="w-full border p-3 rounded-lg h-28 mb-4"
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <input
               type="text"
               placeholder="City"
-              className="border p-3 rounded-lg"
+              className="w-full border p-2 mb-3 rounded"
               value={city}
               onChange={(e) => setCity(e.target.value)}
             />
 
             <input
               type="text"
-              placeholder="WhatsApp / Phone"
-              className="border p-3 rounded-lg"
+              placeholder="Phone"
+              className="w-full border p-2 mb-4 rounded"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
-          </div>
 
-          <button
-            onClick={saveProfile}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
-          >
-            Save Profile
-          </button>
-        </div>
-      </section>
+            <button
+              onClick={saveProfile}
+              className="w-full bg-green-600 text-white py-2 rounded"
+            >
+              Save Profile
+            </button>
+          </>
+        )}
+      </div>
     </main>
   );
 }

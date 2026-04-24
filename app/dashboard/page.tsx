@@ -6,10 +6,10 @@ import { supabase } from "../../lib/supabase";
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState("");
+  const [name, setName] = useState("");
   const [loginSuccess, setLoginSuccess] = useState(false);
 
   useEffect(() => {
-    // ✅ FIX: get query param safely (no prerender error)
     const params = new URLSearchParams(window.location.search);
     setLoginSuccess(params.get("login") === "success");
 
@@ -23,7 +23,7 @@ export default function DashboardPage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, name")
         .eq("user_id", userData.user.id)
         .maybeSingle();
 
@@ -33,6 +33,7 @@ export default function DashboardPage() {
       }
 
       setRole(profile.role);
+      setName(profile.name || "there");
       setLoading(false);
     };
 
@@ -50,13 +51,13 @@ export default function DashboardPage() {
   const clientCards = [
     {
       title: "Post a Need",
-      desc: "Create a new work requirement and receive applications.",
+      desc: "Create a new requirement and receive applications.",
       href: "/post-need",
       icon: "📝",
     },
     {
       title: "My Needs",
-      desc: "Manage your posted needs, applicants, and contact unlocks.",
+      desc: "Manage posted needs, applicants and contact unlocks.",
       href: "/my-needs",
       icon: "📌",
     },
@@ -68,7 +69,7 @@ export default function DashboardPage() {
     },
     {
       title: "My Profile",
-      desc: "Update your profile details.",
+      desc: "Update your profile and contact details.",
       href: "/profile",
       icon: "👤",
     },
@@ -77,19 +78,19 @@ export default function DashboardPage() {
   const providerCards = [
     {
       title: "Browse Needs",
-      desc: "Find available work opportunities.",
+      desc: "Find available work opportunities from clients.",
       href: "/needs",
       icon: "🔍",
     },
     {
       title: "My Applications",
-      desc: "Track your proposals and bids.",
+      desc: "Track proposals, bids and application status.",
       href: "/my-applications",
       icon: "📨",
     },
     {
       title: "My Profile",
-      desc: "Update your skills and details.",
+      desc: "Update your skills, bio and contact details.",
       href: "/profile",
       icon: "👤",
     },
@@ -99,68 +100,83 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      
-      {/* HEADER */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-14 text-white">
+      <section className="bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 px-6 py-16 text-white">
         <div className="mx-auto max-w-6xl">
-          <p className="mb-2 text-blue-100">
+          <p className="mb-3 text-blue-100">
             {role === "client" ? "Client Workspace" : "Provider Workspace"}
           </p>
 
-          <h1 className="text-4xl font-extrabold">
-            {role === "client"
-              ? "Manage your work"
-              : "Find work opportunities"}
+          <h1 className="text-4xl font-black md:text-5xl">
+            Welcome {name}, {role === "client" ? "manage your hiring." : "find your next work."}
           </h1>
+
+          <p className="mt-4 max-w-2xl text-blue-100">
+            {role === "client"
+              ? "Post requirements, review applicants, and unlock the right provider contact."
+              : "Browse available needs, apply with proposals, and track your application status."}
+          </p>
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-10">
-
-        {/* ✅ LOGIN SUCCESS MESSAGE */}
         {loginSuccess && (
           <p className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700">
             ✅ Welcome back! Login successful.
           </p>
         )}
 
-        {/* INFO CARDS */}
-        <div className="mb-8 rounded-3xl border bg-white p-6 shadow-sm">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl bg-slate-50 p-5">
-              <p className="text-sm text-slate-500">Your Role</p>
-              <h2 className="text-2xl font-bold capitalize">{role}</h2>
-            </div>
+        <div className="mb-10 grid gap-5 md:grid-cols-3">
+          <div className="rounded-3xl border bg-white p-6 shadow-sm">
+            <p className="text-sm font-medium text-slate-500">Your Role</p>
+            <h2 className="mt-2 text-3xl font-black capitalize text-slate-950">
+              {role}
+            </h2>
+          </div>
 
-            <div className="rounded-2xl bg-slate-50 p-5">
-              <p className="text-sm text-slate-500">Flow</p>
-              <h2 className="text-2xl font-bold">
-                {role === "client" ? "Post → Hire" : "Browse → Apply"}
-              </h2>
-            </div>
+          <div className="rounded-3xl border bg-white p-6 shadow-sm">
+            <p className="text-sm font-medium text-slate-500">Main Flow</p>
+            <h2 className="mt-2 text-3xl font-black text-slate-950">
+              {role === "client" ? "Post → Hire" : "Browse → Apply"}
+            </h2>
+          </div>
 
-            <div className="rounded-2xl bg-slate-50 p-5">
-              <p className="text-sm text-slate-500">Next</p>
-              <h2 className="text-2xl font-bold">
-                {role === "client" ? "Post Need" : "Apply"}
-              </h2>
-            </div>
+          <div className="rounded-3xl border bg-white p-6 shadow-sm">
+            <p className="text-sm font-medium text-slate-500">Recommended Next</p>
+            <h2 className="mt-2 text-3xl font-black text-slate-950">
+              {role === "client" ? "Post Need" : "Apply Now"}
+            </h2>
           </div>
         </div>
 
-        {/* ACTION CARDS */}
-        <h2 className="mb-6 text-2xl font-bold">Quick Actions</h2>
+        <div className="mb-6 flex items-end justify-between">
+          <div>
+            <h2 className="text-3xl font-black text-slate-950">Quick Actions</h2>
+            <p className="mt-1 text-slate-600">
+              Choose the action that matches your role.
+            </p>
+          </div>
+        </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {cards.map((card) => (
             <a
               key={card.href}
               href={card.href}
-              className="group rounded-3xl border bg-white p-6 shadow-sm hover:-translate-y-1 hover:shadow-xl transition"
+              className="group rounded-3xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="text-4xl mb-4">{card.icon}</div>
-              <h3 className="text-xl font-bold">{card.title}</h3>
-              <p className="text-slate-600 mt-2">{card.desc}</p>
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-3xl">
+                {card.icon}
+              </div>
+
+              <h3 className="text-2xl font-black text-slate-950">
+                {card.title}
+              </h3>
+
+              <p className="mt-3 text-slate-600">{card.desc}</p>
+
+              <span className="mt-6 inline-block font-bold text-blue-600 group-hover:underline">
+                Open →
+              </span>
             </a>
           ))}
         </div>
