@@ -6,6 +6,8 @@ import { supabase } from "../../lib/supabase";
 export default function CreditsPage() {
   const [balance, setBalance] = useState(0);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
 
   const loadCredits = async () => {
     const { data: userData } = await supabase.auth.getUser();
@@ -15,18 +17,26 @@ export default function CreditsPage() {
       return;
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("credits")
       .select("*")
       .eq("user_id", userData.user.id)
-      .single();
+      .maybeSingle();
+
+    if (error) {
+      setMessage(error.message);
+    }
 
     if (data) {
       setBalance(data.balance || 0);
     }
+
+    setLoading(false);
   };
 
   const addCredits = async () => {
+    setAdding(true);
+
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
@@ -49,11 +59,21 @@ export default function CreditsPage() {
       setBalance(newBalance);
       setMessage("5 demo credits added!");
     }
+
+    setAdding(false);
   };
 
   useEffect(() => {
     loadCredits();
   }, []);
+
+  if (loading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p>Loading credits...</p>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gray-100 p-8">
@@ -72,9 +92,10 @@ export default function CreditsPage() {
 
         <button
           onClick={addCredits}
+          disabled={adding}
           className="w-full bg-blue-600 text-white py-2 rounded"
         >
-          Add 5 Demo Credits
+          {adding ? "Adding..." : "Add 5 Demo Credits"}
         </button>
 
         <p className="text-sm text-gray-500 mt-4">

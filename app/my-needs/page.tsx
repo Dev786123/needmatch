@@ -8,12 +8,13 @@ export default function MyNeedsPage() {
   const [applications, setApplications] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);
   const [unlocks, setUnlocks] = useState<any[]>([]);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      console.log("Please login first");
       window.location.href = "/login";
       return;
     }
@@ -39,6 +40,7 @@ export default function MyNeedsPage() {
     setApplications(appsData || []);
     setProfiles(profilesData || []);
     setUnlocks(unlocksData || []);
+    setLoading(false);
   };
 
   const updateApplicationStatus = async (appId: number, status: string) => {
@@ -48,66 +50,61 @@ export default function MyNeedsPage() {
       .eq("id", appId);
 
     if (error) {
-      console.log(error.message);
+      setMessage(error.message);
     } else {
-      console.log(`Application ${status}`);
+      setMessage(`Application ${status}`);
       fetchData();
     }
   };
 
   const handleUnlock = async (app: any) => {
-  const { data: userData } = await supabase.auth.getUser();
+    const { data: userData } = await supabase.auth.getUser();
 
-  if (!userData.user) {
-    console.log("Please login first");
-    window.location.href = "/login";
-    return;
-  }
+    if (!userData.user) {
+      window.location.href = "/login";
+      return;
+    }
 
-  // 🔥 1. Get current credits
-  const { data: creditData } = await supabase
-    .from("credits")
-    .select("*")
-    .eq("user_id", userData.user.id)
-    .single();
+    const { data: creditData } = await supabase
+      .from("credits")
+      .select("*")
+      .eq("user_id", userData.user.id)
+      .maybeSingle();
 
-  const currentCredits = creditData?.balance || 0;
+    const currentCredits = creditData?.balance || 0;
 
-  // ❌ Not enough credits
-  if (currentCredits <= 0) {
-    console.log("No credits left! Buy credits first.");
-    window.location.href = "/credits";
-    return;
-  }
+    if (currentCredits <= 0) {
+      setMessage("No credits left! Buy credits first.");
+      window.location.href = "/credits";
+      return;
+    }
 
-  // 🔥 2. Deduct 1 credit
-  const { error: creditError } = await supabase
-    .from("credits")
-    .update({ balance: currentCredits - 1 })
-    .eq("user_id", userData.user.id);
+    const { error: creditError } = await supabase
+      .from("credits")
+      .update({ balance: currentCredits - 1 })
+      .eq("user_id", userData.user.id);
 
-  if (creditError) {
-    console.log(creditError.message);
-    return;
-  }
+    if (creditError) {
+      setMessage(creditError.message);
+      return;
+    }
 
-  // 🔥 3. Save unlock
-  const { error } = await supabase.from("contact_unlocks").insert([
-    {
-      need_id: app.need_id,
-      application_id: app.id,
-      client_id: userData.user.id,
-      provider_id: app.provider_id,
-    },
-  ]);
+    const { error } = await supabase.from("contact_unlocks").insert([
+      {
+        need_id: app.need_id,
+        application_id: app.id,
+        client_id: userData.user.id,
+        provider_id: app.provider_id,
+      },
+    ]);
 
-  if (error) {
-    console.log(error.message);
-  } else {
-    console.log("Contact unlocked!");
-    fetchData();
-  }
-};
+    if (error) {
+      setMessage(error.message);
+    } else {
+      setMessage("Contact unlocked!");
+      fetchData();
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -121,9 +118,23 @@ export default function MyNeedsPage() {
     return unlocks.some((unlock) => unlock.application_id === applicationId);
   };
 
+  if (loading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p>Loading your needs...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen p-8 bg-gray-100">
       <h1 className="text-3xl font-bold mb-6">My Needs</h1>
+
+      {message && (
+        <p className="mb-4 text-sm text-blue-600">
+          {message}
+        </p>
+      )}
 
       {needs.length === 0 && (
         <p className="text-gray-500">No needs found.</p>

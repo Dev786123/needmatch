@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function PostNeedPage() {
@@ -8,12 +8,32 @@ export default function PostNeedPage() {
   const [budget, setBudget] = useState("");
   const [city, setCity] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // 🔒 Route protection
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+
+      if (!data.user) {
+        window.location.href = "/login";
+        return;
+      }
+
+      setLoading(false);
+    };
+
+    checkUser();
+  }, []);
 
   const handleSubmit = async () => {
     if (!title || !budget || !city) {
       setMessage("Please fill all fields");
       return;
     }
+
+    setSubmitting(true);
 
     const { data: userData } = await supabase.auth.getUser();
 
@@ -40,7 +60,18 @@ export default function PostNeedPage() {
       setBudget("");
       setCity("");
     }
+
+    setSubmitting(false);
   };
+
+  // ⏳ Loading screen
+  if (loading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p>Checking login...</p>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -81,9 +112,10 @@ export default function PostNeedPage() {
 
         <button
           onClick={handleSubmit}
+          disabled={submitting}
           className="w-full bg-blue-600 text-white py-2 rounded"
         >
-          Post Need
+          {submitting ? "Posting..." : "Post Need"}
         </button>
       </div>
     </main>

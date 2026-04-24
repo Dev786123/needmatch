@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import { useParams } from "next/navigation";
 
@@ -11,12 +11,44 @@ export default function ApplyPage() {
   const [proposal, setProposal] = useState("");
   const [bid, setBid] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [alreadyApplied, setAlreadyApplied] = useState(false);
+
+  useEffect(() => {
+    const checkUserAndApplication = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+
+      if (!userData.user) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const { data: existingApplication } = await supabase
+        .from("applications")
+        .select("*")
+        .eq("need_id", needId)
+        .eq("provider_id", userData.user.id)
+        .maybeSingle();
+
+      if (existingApplication) {
+        setAlreadyApplied(true);
+        setMessage("You have already applied to this need.");
+      }
+
+      setLoading(false);
+    };
+
+    checkUserAndApplication();
+  }, [needId]);
 
   const handleApply = async () => {
     if (!proposal || !bid) {
       setMessage("Please fill proposal and bid");
       return;
     }
+
+    setSubmitting(true);
 
     const { data: userData } = await supabase.auth.getUser();
 
@@ -41,43 +73,55 @@ export default function ApplyPage() {
       setMessage("Application submitted successfully!");
       setProposal("");
       setBid("");
+      setAlreadyApplied(true);
     }
+
+    setSubmitting(false);
   };
+
+  if (loading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p>Checking application...</p>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Apply to Need
-        </h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Apply to Need</h2>
 
         {message && (
-          <p className="mb-4 text-center text-sm text-blue-600">
-            {message}
-          </p>
+          <p className="mb-4 text-center text-sm text-blue-600">{message}</p>
         )}
 
-        <textarea
-          placeholder="Write your proposal"
-          className="w-full border p-2 mb-4 rounded h-32"
-          value={proposal}
-          onChange={(e) => setProposal(e.target.value)}
-        />
+        {!alreadyApplied && (
+          <>
+            <textarea
+              placeholder="Write your proposal"
+              className="w-full border p-2 mb-4 rounded h-32"
+              value={proposal}
+              onChange={(e) => setProposal(e.target.value)}
+            />
 
-        <input
-          type="text"
-          placeholder="Your bid amount"
-          className="w-full border p-2 mb-4 rounded"
-          value={bid}
-          onChange={(e) => setBid(e.target.value)}
-        />
+            <input
+              type="text"
+              placeholder="Your bid amount"
+              className="w-full border p-2 mb-4 rounded"
+              value={bid}
+              onChange={(e) => setBid(e.target.value)}
+            />
 
-        <button
-          onClick={handleApply}
-          className="w-full bg-blue-600 text-white py-2 rounded"
-        >
-          Submit Application
-        </button>
+            <button
+              onClick={handleApply}
+              disabled={submitting}
+              className="w-full bg-blue-600 text-white py-2 rounded"
+            >
+              {submitting ? "Submitting..." : "Submit Application"}
+            </button>
+          </>
+        )}
       </div>
     </main>
   );

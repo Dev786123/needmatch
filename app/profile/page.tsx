@@ -11,6 +11,7 @@ export default function ProfilePage() {
   const [city, setCity] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const loadProfile = async () => {
     const { data: userData } = await supabase.auth.getUser();
@@ -20,11 +21,15 @@ export default function ProfilePage() {
       return;
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userData.user.id)
-      .single();
+      .maybeSingle();
+
+    if (error) {
+      setMessage(error.message);
+    }
 
     if (data) {
       setName(data.name || "");
@@ -34,6 +39,8 @@ export default function ProfilePage() {
       setCity(data.city || "");
       setPhone(data.phone || "");
     }
+
+    setLoading(false);
   };
 
   const saveProfile = async () => {
@@ -55,7 +62,7 @@ export default function ProfilePage() {
         user_id: userData.user.id,
         name,
         role,
-        skill,
+        skill: role === "provider" ? skill : "",
         bio,
         city,
         phone,
@@ -73,19 +80,21 @@ export default function ProfilePage() {
     loadProfile();
   }, []);
 
+  if (loading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p>Loading profile...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-4 text-center">My Profile</h1>
 
-        <h1 className="text-2xl font-bold mb-4 text-center">
-          My Profile
-        </h1>
-
-        {/* MESSAGE UI */}
         {message && (
-          <p className="mb-4 text-center text-sm text-blue-600">
-            {message}
-          </p>
+          <p className="mb-4 text-center text-sm text-blue-600">{message}</p>
         )}
 
         <input
@@ -105,7 +114,6 @@ export default function ProfilePage() {
           <option value="provider">Provider</option>
         </select>
 
-        {/* Provider only field */}
         {role === "provider" && (
           <input
             type="text"
@@ -145,7 +153,6 @@ export default function ProfilePage() {
         >
           Save Profile
         </button>
-
       </div>
     </main>
   );
