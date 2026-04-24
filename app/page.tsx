@@ -1,118 +1,97 @@
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-50">
-      <section className="px-6 py-20 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-          Post Needs. Find Talent. Get Work Done.
-        </h1>
+    <main className="min-h-screen bg-slate-50">
+      <section className="mx-auto max-w-6xl px-6 py-20">
+        <div className="grid items-center gap-10 md:grid-cols-2">
+          <div>
+            <span className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+              Need → Match → Hire
+            </span>
 
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-          NeedMatch helps clients post work requirements and connect with
-          skilled providers, freelancers, and service experts.
-        </p>
+            <h1 className="mt-6 text-5xl font-extrabold leading-tight text-slate-950">
+              Post your need. Find the right talent faster.
+            </h1>
 
-        <div className="flex justify-center gap-4 flex-wrap">
-          <a
-            href="/signup"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium"
-          >
-            Get Started
-          </a>
-
-          <a
-            href="/needs"
-            className="bg-white border px-6 py-3 rounded-lg font-medium"
-          >
-            Browse Needs
-          </a>
-        </div>
-      </section>
-
-      <section className="px-6 py-12 bg-white">
-        <h2 className="text-3xl font-bold text-center mb-10">
-          How NeedMatch Works
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          <div className="p-6 rounded-xl border bg-gray-50">
-            <h3 className="text-xl font-bold mb-2">1. Post a Need</h3>
-            <p className="text-gray-600">
-              Clients describe what they need, their budget, and city.
+            <p className="mt-5 text-lg leading-8 text-slate-600">
+              NeedMatch helps clients post work requirements and connect with
+              providers, freelancers, and service experts through a simple
+              application and contact unlock flow.
             </p>
+
+            <div className="mt-8 flex flex-wrap gap-4">
+              <a
+                href="/signup"
+                className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+              >
+                Get Started
+              </a>
+
+              <a
+                href="/needs"
+                className="rounded-xl border bg-white px-6 py-3 font-semibold text-slate-800 hover:bg-slate-100"
+              >
+                Browse Needs
+              </a>
+            </div>
           </div>
 
-          <div className="p-6 rounded-xl border bg-gray-50">
-            <h3 className="text-xl font-bold mb-2">2. Providers Apply</h3>
-            <p className="text-gray-600">
-              Skilled providers submit proposals and bid amounts.
-            </p>
-          </div>
+          <div className="rounded-3xl border bg-white p-6 shadow-xl">
+            <div className="rounded-2xl bg-slate-50 p-5">
+              <p className="text-sm font-semibold text-blue-600">
+                Live workflow
+              </p>
 
-          <div className="p-6 rounded-xl border bg-gray-50">
-            <h3 className="text-xl font-bold mb-2">3. Hire & Connect</h3>
-            <p className="text-gray-600">
-              Clients review applicants, accept them, and unlock contact.
-            </p>
-          </div>
-        </div>
-      </section>
+              <div className="mt-5 space-y-4">
+                <div className="rounded-xl bg-white p-4 shadow-sm">
+                  <h3 className="font-bold">Client posts a need</h3>
+                  <p className="text-sm text-slate-600">
+                    Website, design, marketing or any service requirement.
+                  </p>
+                </div>
 
-      <section className="px-6 py-16">
-        <h2 className="text-3xl font-bold text-center mb-10">
-          Built for Fast Hiring
-        </h2>
+                <div className="rounded-xl bg-white p-4 shadow-sm">
+                  <h3 className="font-bold">Providers apply</h3>
+                  <p className="text-sm text-slate-600">
+                    Proposals and bids are submitted directly.
+                  </p>
+                </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3 className="text-xl font-bold mb-2">For Clients</h3>
-            <p className="text-gray-600">
-              Post work requirements and find suitable service providers without
-              wasting time.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3 className="text-xl font-bold mb-2">For Providers</h3>
-            <p className="text-gray-600">
-              Browse real needs, apply with proposals, and track your
-              applications.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3 className="text-xl font-bold mb-2">Credits System</h3>
-            <p className="text-gray-600">
-              Use credits to unlock contacts and create a simple monetization
-              flow.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3 className="text-xl font-bold mb-2">Profile Based Trust</h3>
-            <p className="text-gray-600">
-              Providers can add skills, bio, city, and phone details for better
-              trust.
-            </p>
+                <div className="rounded-xl bg-white p-4 shadow-sm">
+                  <h3 className="font-bold">Client unlocks contact</h3>
+                  <p className="text-sm text-slate-600">
+                    Credits create the monetization flow.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-16 bg-blue-600 text-white text-center">
-        <h2 className="text-3xl font-bold mb-4">
-          Start matching needs with talent today.
-        </h2>
+      <section className="border-y bg-white px-6 py-14">
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
+          <div className="rounded-2xl border p-6">
+            <h3 className="text-xl font-bold">For Clients</h3>
+            <p className="mt-2 text-slate-600">
+              Post requirements and review applicants from one dashboard.
+            </p>
+          </div>
 
-        <p className="mb-8 text-blue-100">
-          Build your profile, post your requirement, or apply to available work.
-        </p>
+          <div className="rounded-2xl border p-6">
+            <h3 className="text-xl font-bold">For Providers</h3>
+            <p className="mt-2 text-slate-600">
+              Browse real needs and apply with proposals and bids.
+            </p>
+          </div>
 
-        <a
-          href="/signup"
-          className="bg-white text-blue-600 px-6 py-3 rounded-lg font-medium"
-        >
-          Create Free Account
-        </a>
+          <div className="rounded-2xl border p-6">
+            <h3 className="text-xl font-bold">Credit Unlock</h3>
+            <p className="mt-2 text-slate-600">
+              Unlock contact details using credits for monetization.
+            </p>
+          </div>
+        </div>
       </section>
     </main>
   );
-}
+} 

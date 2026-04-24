@@ -11,23 +11,20 @@ export default function NeedDetailPage() {
   const [need, setNeed] = useState<any>(null);
   const [message, setMessage] = useState("");
 
-  const fetchNeed = async () => {
-    const { data, error } = await supabase
-      .from("needs")
-      .select("*")
-      .eq("id", needId)
-      .maybeSingle();
-
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setNeed(data);
-    }
-  };
-
   useEffect(() => {
+    const fetchNeed = async () => {
+      const { data, error } = await supabase
+        .from("needs")
+        .select("*")
+        .eq("id", needId)
+        .maybeSingle();
+
+      if (error) setMessage(error.message);
+      else setNeed(data);
+    };
+
     fetchNeed();
-  }, []);
+  }, [needId]);
 
   if (!need && !message) {
     return (
@@ -39,65 +36,89 @@ export default function NeedDetailPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <section className="bg-white border-b px-6 py-10">
-        <div className="max-w-4xl mx-auto">
-          <a href="/needs" className="text-blue-600 font-medium">
-            ← Back to Needs
+      <section className="bg-white border-b px-6 py-12">
+        <div className="mx-auto max-w-5xl">
+          <a href="/needs" className="font-semibold text-blue-600 hover:underline">
+            ← Back to Browse Needs
           </a>
 
-          <h1 className="text-4xl font-bold text-slate-900 mt-4 mb-3">
-            {need?.title || "Need not found"}
-          </h1>
+          <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+                Open Requirement
+              </span>
 
-          <p className="text-slate-600">
-            Review this requirement and apply if it matches your skills.
-          </p>
+              <h1 className="mt-4 text-4xl font-extrabold text-slate-950">
+                {need?.title || "Need not found"}
+              </h1>
+
+              <p className="mt-3 text-slate-600">
+                Review the requirement and submit your proposal if it matches your skills.
+              </p>
+            </div>
+
+            {need && (
+              <a
+                href={`/apply/${need.id}`}
+                className="rounded-xl bg-blue-600 px-6 py-3 text-center font-semibold text-white hover:bg-blue-700"
+              >
+                Apply Now
+              </a>
+            )}
+          </div>
         </div>
       </section>
 
-      <section className="max-w-4xl mx-auto px-6 py-8">
+      <section className="mx-auto max-w-5xl px-6 py-10">
         {message && (
-          <p className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg">
+          <p className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-600">
             {message}
           </p>
         )}
 
         {need && (
-          <div className="bg-white rounded-2xl shadow-sm border p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="border rounded-xl p-4">
-                <p className="text-sm text-slate-500">Budget</p>
-                <h2 className="text-2xl font-bold text-slate-900">
-                  {need.budget}
+          <div className="rounded-3xl border bg-white p-6 shadow-sm">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-2xl bg-slate-50 p-5">
+                <p className="text-xs font-medium text-slate-500">Budget</p>
+                <h2 className="mt-1 text-2xl font-bold text-slate-950">
+                  {need.budget || "Not mentioned"}
                 </h2>
               </div>
 
-              <div className="border rounded-xl p-4">
-                <p className="text-sm text-slate-500">City</p>
-                <h2 className="text-2xl font-bold text-slate-900">
-                  {need.city}
+              <div className="rounded-2xl bg-slate-50 p-5">
+                <p className="text-xs font-medium text-slate-500">City</p>
+                <h2 className="mt-1 text-2xl font-bold text-slate-950">
+                  {need.city || "Not mentioned"}
+                </h2>
+              </div>
+
+              <div className="rounded-2xl bg-slate-50 p-5">
+                <p className="text-xs font-medium text-slate-500">Status</p>
+                <h2 className="mt-1 text-2xl font-bold text-green-700">
+                  Open
                 </h2>
               </div>
             </div>
 
-            <div className="mb-6">
-              <p className="text-sm text-slate-500 mb-1">Posted At</p>
-              <p className="text-slate-700">{need.created_at}</p>
+            <div className="mt-6 rounded-2xl border p-5">
+              <p className="text-sm font-semibold text-slate-500">Posted At</p>
+              <p className="mt-1 text-slate-700">{need.created_at}</p>
             </div>
 
-            <div className="flex gap-3 flex-wrap">
+            <div className="mt-6 flex flex-wrap gap-3">
               <a
                 href={`/apply/${need.id}`}
-                className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700"
+                className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
               >
                 Apply Now
               </a>
 
               <a
                 href="/needs"
-                className="border px-5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"
+                className="rounded-xl border bg-white px-6 py-3 font-semibold text-slate-700 hover:bg-slate-100"
               >
-                Browse More
+                Browse More Needs
               </a>
             </div>
           </div>
