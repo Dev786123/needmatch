@@ -19,6 +19,17 @@ export default function MyNeedsPage() {
       return;
     }
 
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", userData.user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "client") {
+      window.location.href = "/dashboard";
+      return;
+    }
+
     const { data: needsData } = await supabase
       .from("needs")
       .select("*")
@@ -56,6 +67,17 @@ export default function MyNeedsPage() {
 
     if (!userData.user) {
       window.location.href = "/login";
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", userData.user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "client") {
+      window.location.href = "/dashboard";
       return;
     }
 

@@ -16,11 +16,22 @@ export default function ApplyPage() {
   const [alreadyApplied, setAlreadyApplied] = useState(false);
 
   useEffect(() => {
-    const checkUserAndApplication = async () => {
+    const checkUserRoleAndApplication = async () => {
       const { data: userData } = await supabase.auth.getUser();
 
       if (!userData.user) {
         window.location.href = "/login";
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
+
+      if (profile?.role !== "provider") {
+        window.location.href = "/dashboard";
         return;
       }
 
@@ -39,7 +50,7 @@ export default function ApplyPage() {
       setLoading(false);
     };
 
-    checkUserAndApplication();
+    checkUserRoleAndApplication();
   }, [needId]);
 
   const handleApply = async () => {
@@ -54,6 +65,17 @@ export default function ApplyPage() {
 
     if (!userData.user) {
       window.location.href = "/login";
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", userData.user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "provider") {
+      window.location.href = "/dashboard";
       return;
     }
 
@@ -117,6 +139,7 @@ export default function ApplyPage() {
               <label className="block mb-2 font-medium text-slate-700">
                 Your Proposal
               </label>
+
               <textarea
                 placeholder="Example: I can build this website in 5 days with responsive design."
                 className="w-full border p-3 mb-5 rounded-lg h-32"
@@ -127,6 +150,7 @@ export default function ApplyPage() {
               <label className="block mb-2 font-medium text-slate-700">
                 Your Bid Amount
               </label>
+
               <input
                 type="text"
                 placeholder="Example: ₹4000"

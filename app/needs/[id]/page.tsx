@@ -10,23 +10,47 @@ export default function NeedDetailPage() {
 
   const [need, setNeed] = useState<any>(null);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchNeed = async () => {
+    const loadNeedDetail = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+
+      if (!userData.user) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
+
+      if (profile?.role !== "provider") {
+        window.location.href = "/dashboard";
+        return;
+      }
+
       const { data, error } = await supabase
         .from("needs")
         .select("*")
         .eq("id", needId)
         .maybeSingle();
 
-      if (error) setMessage(error.message);
-      else setNeed(data);
+      if (error) {
+        setMessage(error.message);
+      } else {
+        setNeed(data);
+      }
+
+      setLoading(false);
     };
 
-    fetchNeed();
+    loadNeedDetail();
   }, [needId]);
 
-  if (!need && !message) {
+  if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-slate-50">
         <p className="text-slate-600">Loading need...</p>

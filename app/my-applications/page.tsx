@@ -12,8 +12,21 @@ export default function MyApplicationsPage() {
   const fetchApplications = async () => {
     const { data: userData } = await supabase.auth.getUser();
 
+    // 🔒 Not logged in
     if (!userData.user) {
       window.location.href = "/login";
+      return;
+    }
+
+    // 🔒 Role check
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", userData.user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "provider") {
+      window.location.href = "/dashboard";
       return;
     }
 
@@ -43,8 +56,10 @@ export default function MyApplicationsPage() {
   };
 
   const getStatusClass = (status: string) => {
-    if (status === "ACCEPTED") return "bg-green-50 text-green-700 border-green-200";
-    if (status === "REJECTED") return "bg-red-50 text-red-700 border-red-200";
+    if (status === "ACCEPTED")
+      return "bg-green-50 text-green-700 border-green-200";
+    if (status === "REJECTED")
+      return "bg-red-50 text-red-700 border-red-200";
     return "bg-yellow-50 text-yellow-700 border-yellow-200";
   };
 
@@ -79,7 +94,9 @@ export default function MyApplicationsPage() {
 
         {applications.length === 0 && (
           <div className="bg-white rounded-2xl border p-8 text-center">
-            <h2 className="text-xl font-bold mb-2">No applications found</h2>
+            <h2 className="text-xl font-bold mb-2">
+              No applications found
+            </h2>
             <p className="text-slate-600 mb-4">
               Browse available needs and submit your first proposal.
             </p>

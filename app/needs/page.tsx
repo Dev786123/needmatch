@@ -10,6 +10,24 @@ export default function NeedsPage() {
 
   useEffect(() => {
     const loadNeeds = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+
+      if (!userData.user) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
+
+      if (profile?.role !== "provider") {
+        window.location.href = "/dashboard";
+        return;
+      }
+
       const { data, error } = await supabase
         .from("needs")
         .select("*")
@@ -37,7 +55,7 @@ export default function NeedsPage() {
     <main className="min-h-screen bg-slate-50">
       <section className="bg-white border-b px-6 py-12">
         <div className="max-w-6xl mx-auto">
-          <p className="text-blue-600 font-semibold mb-2">Available Work</p>
+          <p className="text-blue-600 font-semibold mb-2">Provider Workspace</p>
           <h1 className="text-4xl font-extrabold text-slate-950">
             Browse Needs
           </h1>

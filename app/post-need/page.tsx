@@ -12,18 +12,29 @@ export default function PostNeedPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
+    const checkUserRole = async () => {
+      const { data: userData } = await supabase.auth.getUser();
 
-      if (!data.user) {
+      if (!userData.user) {
         window.location.href = "/login";
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
+
+      if (profile?.role !== "client") {
+        window.location.href = "/dashboard";
         return;
       }
 
       setLoading(false);
     };
 
-    checkUser();
+    checkUserRole();
   }, []);
 
   const handleSubmit = async () => {
@@ -38,6 +49,17 @@ export default function PostNeedPage() {
 
     if (!userData.user) {
       window.location.href = "/login";
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", userData.user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "client") {
+      window.location.href = "/dashboard";
       return;
     }
 
@@ -65,7 +87,7 @@ export default function PostNeedPage() {
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-slate-50">
-        <p className="text-slate-600">Checking login...</p>
+        <p className="text-slate-600">Checking access...</p>
       </main>
     );
   }

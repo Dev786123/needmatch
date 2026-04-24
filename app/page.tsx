@@ -3,6 +3,7 @@ export default function Home() {
     <main className="min-h-screen bg-slate-50">
       <section className="mx-auto max-w-6xl px-6 py-20">
         <div className="grid items-center gap-10 md:grid-cols-2">
+          
           <div>
             <span className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
               Need → Match → Hire
@@ -19,6 +20,8 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
+              
+              {/* ✅ Signup button */}
               <a
                 href="/signup"
                 className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
@@ -26,15 +29,18 @@ export default function Home() {
                 Get Started
               </a>
 
+              {/* 🔥 FIX: browse needs → login */}
               <a
-                href="/needs"
+                href="/login"
                 className="rounded-xl border bg-white px-6 py-3 font-semibold text-slate-800 hover:bg-slate-100"
               >
-                Browse Needs
+                Login to Browse
               </a>
+
             </div>
           </div>
 
+          {/* RIGHT CARD */}
           <div className="rounded-3xl border bg-white p-6 shadow-xl">
             <div className="rounded-2xl bg-slate-50 p-5">
               <p className="text-sm font-semibold text-blue-600">
@@ -65,11 +71,14 @@ export default function Home() {
               </div>
             </div>
           </div>
+
         </div>
       </section>
 
+      {/* FEATURES */}
       <section className="border-y bg-white px-6 py-14">
         <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
+
           <div className="rounded-2xl border p-6">
             <h3 className="text-xl font-bold">For Clients</h3>
             <p className="mt-2 text-slate-600">
@@ -90,8 +99,9 @@ export default function Home() {
               Unlock contact details using credits for monetization.
             </p>
           </div>
+
         </div>
       </section>
     </main>
   );
-} 
+}

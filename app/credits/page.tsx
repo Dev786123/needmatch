@@ -17,6 +17,17 @@ export default function CreditsPage() {
       return;
     }
 
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", userData.user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "client") {
+      window.location.href = "/dashboard";
+      return;
+    }
+
     const { data, error } = await supabase
       .from("credits")
       .select("*")
@@ -36,6 +47,17 @@ export default function CreditsPage() {
 
     if (!userData.user) {
       window.location.href = "/login";
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", userData.user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "client") {
+      window.location.href = "/dashboard";
       return;
     }
 
@@ -74,7 +96,7 @@ export default function CreditsPage() {
     <main className="min-h-screen bg-slate-50">
       <section className="bg-white border-b px-6 py-10">
         <div className="max-w-4xl mx-auto">
-          <p className="text-blue-600 font-medium mb-2">Monetization</p>
+          <p className="text-blue-600 font-medium mb-2">Client Monetization</p>
           <h1 className="text-4xl font-bold text-slate-900 mb-3">Credits</h1>
           <p className="text-slate-600">
             Use credits to unlock provider contact details.
@@ -107,7 +129,7 @@ export default function CreditsPage() {
             <button
               onClick={addCredits}
               disabled={adding}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-60"
             >
               {adding ? "Adding..." : "Add 5 Demo Credits"}
             </button>
