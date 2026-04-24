@@ -12,7 +12,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <a href="/" className="flex items-center gap-2">
-  <img src="/logo.png" alt="NeedMatch" className="h-9 w-auto" />
+  <img src="/logo.png" alt="NeedMatch" className="h-20 w-auto" />
 </a>
 
         <div className="hidden items-center gap-5 text-sm font-medium text-slate-700 md:flex">
