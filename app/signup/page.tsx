@@ -6,38 +6,48 @@ import { supabase } from "../../lib/supabase";
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("provider");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
-    if (!email || !password) {
-      setMessage("Please enter email and password");
+    if (!email || !password || !role) {
+      setMessage("Please enter email, password and role");
       return;
     }
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (error) {
       setMessage(error.message);
-    } else {
-      setMessage("Signup successful! Please login now.");
-      setEmail("");
-      setPassword("");
+      setLoading(false);
+      return;
     }
 
+    if (data.user) {
+      await supabase.from("profiles").upsert([
+        {
+          user_id: data.user.id,
+          role,
+        },
+      ]);
+    }
+
+    setMessage("Signup successful! Please login now.");
+    setEmail("");
+    setPassword("");
+    setRole("provider");
     setLoading(false);
   };
 
   return (
     <main className="min-h-screen bg-slate-50">
       <section className="mx-auto grid min-h-screen max-w-6xl items-center gap-10 px-6 py-10 md:grid-cols-2">
-
-        {/* LEFT SIDE */}
         <div className="hidden md:block">
           <span className="rounded-full bg-green-50 px-4 py-2 text-sm font-semibold text-green-700">
             Get started
@@ -48,18 +58,15 @@ export default function SignupPage() {
           </h1>
 
           <p className="mt-5 text-lg leading-8 text-slate-600">
-            Start posting needs, applying to work, and unlocking contacts with credits.
+            Choose your role: client to post work, or provider to apply for work.
           </p>
         </div>
 
-        {/* RIGHT SIDE */}
         <div className="rounded-3xl border bg-white p-8 shadow-xl">
-          <h2 className="text-3xl font-extrabold text-slate-950">
-            Sign Up
-          </h2>
+          <h2 className="text-3xl font-extrabold text-slate-950">Sign Up</h2>
 
           <p className="mt-2 text-slate-600">
-            Create your account in seconds.
+            Create your account and choose your role.
           </p>
 
           {message && (
@@ -68,7 +75,6 @@ export default function SignupPage() {
             </p>
           )}
 
-          {/* EMAIL */}
           <div className="mt-6">
             <label className="mb-2 block text-sm font-semibold text-slate-700">
               Email
@@ -82,7 +88,6 @@ export default function SignupPage() {
             />
           </div>
 
-          {/* PASSWORD */}
           <div className="mt-4">
             <label className="mb-2 block text-sm font-semibold text-slate-700">
               Password
@@ -96,7 +101,20 @@ export default function SignupPage() {
             />
           </div>
 
-          {/* BUTTON */}
+          <div className="mt-4">
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              I want to join as
+            </label>
+            <select
+              className="w-full rounded-xl border p-3 outline-none focus:border-blue-500"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
+              <option value="client">Client - I want to post work</option>
+              <option value="provider">Provider - I want to get work</option>
+            </select>
+          </div>
+
           <button
             onClick={handleSignup}
             disabled={loading}
@@ -112,7 +130,6 @@ export default function SignupPage() {
             </a>
           </p>
         </div>
-
       </section>
     </main>
   );
