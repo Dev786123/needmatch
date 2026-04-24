@@ -6,17 +6,23 @@ import { supabase } from "../../lib/supabase";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      setMessage("Please enter email and password");
+      return;
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      console.log(error.message);
+      setMessage(error.message);
     } else {
-      console.log("Login successful!");
+      setMessage("Login successful!");
       window.location.href = "/dashboard";
     }
   };
@@ -25,6 +31,12 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+
+        {message && (
+          <p className="text-center text-sm text-blue-600 mb-4">
+            {message}
+          </p>
+        )}
 
         <input
           type="email"
