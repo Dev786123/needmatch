@@ -11,9 +11,13 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
+    setMessage("");
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/dashboard?login=success`,
+      },
     });
 
     if (error) {
@@ -23,6 +27,8 @@ export default function LoginPage() {
   };
 
   const handleLogin = async () => {
+    setMessage("");
+
     if (!email || !password) {
       setMessage("Please enter email and password");
       return;
@@ -30,7 +36,7 @@ export default function LoginPage() {
 
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -38,17 +44,6 @@ export default function LoginPage() {
     if (error) {
       setMessage(error.message);
       setLoading(false);
-      return;
-    }
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("user_id", data.user.id)
-      .maybeSingle();
-
-    if (!profile?.role) {
-      window.location.href = "/profile";
       return;
     }
 
