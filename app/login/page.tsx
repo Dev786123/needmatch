@@ -9,6 +9,19 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+
+    if (error) {
+      setMessage(error.message);
+      setLoading(false);
+    }
+  };
+
   const handleLogin = async () => {
     if (!email || !password) {
       setMessage("Please enter email and password");
@@ -122,9 +135,29 @@ export default function LoginPage() {
             {loading ? "Logging in..." : "Login"}
           </button>
 
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-slate-500">or</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full rounded-xl border border-slate-300 bg-white py-3 font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-60"
+          >
+            Continue with Google
+          </button>
+
           <p className="mt-6 text-center text-sm text-slate-600">
             Don&apos;t have an account?{" "}
-            <a href="/signup" className="font-bold text-blue-600 hover:underline">
+            <a
+              href="/signup"
+              className="font-bold text-blue-600 hover:underline"
+            >
               Create account
             </a>
           </p>
