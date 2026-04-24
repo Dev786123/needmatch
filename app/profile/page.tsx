@@ -18,6 +18,8 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
 
   const loadProfile = async () => {
+    setLoading(true);
+
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
@@ -25,11 +27,17 @@ export default function ProfilePage() {
       return;
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userData.user.id)
       .maybeSingle();
+
+    if (error) {
+      setMessage(error.message);
+      setLoading(false);
+      return;
+    }
 
     if (data) {
       setProfile(data);
@@ -43,6 +51,7 @@ export default function ProfilePage() {
       const isComplete = data.name && data.city && data.phone;
       setEditMode(!isComplete);
     } else {
+      setProfile(null);
       setEditMode(true);
     }
 
@@ -59,27 +68,36 @@ export default function ProfilePage() {
 
     const { data: userData } = await supabase.auth.getUser();
 
-    if (!userData?.user) {
+    if (!userData.user) {
       setMessage("User not found. Please login again.");
       return;
     }
 
     const finalRole = profile?.role || role;
 
-    const { error } = await supabase.from("profiles").upsert(
-      {
-        user_id: userData.user.id,
-        name,
-        role: finalRole,
-        skill: finalRole === "provider" ? skill : "",
-        bio,
-        city,
-        phone,
-      },
-      {
-        onConflict: "user_id",
-      }
-    );
+    const profileData = {
+      user_id: userData.user.id,
+      name,
+      role: finalRole,
+      skill: finalRole === "provider" ? skill : "",
+      bio,
+      city,
+      phone,
+    };
+
+    let error;
+
+    if (profile?.id) {
+      const result = await supabase
+        .from("profiles")
+        .update(profileData)
+        .eq("id", profile.id);
+
+      error = result.error;
+    } else {
+      const result = await supabase.from("profiles").insert([profileData]);
+      error = result.error;
+    }
 
     if (error) {
       setMessage(error.message);
