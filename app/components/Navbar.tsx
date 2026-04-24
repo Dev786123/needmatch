@@ -17,7 +17,7 @@ export default function Navbar() {
           <img
             src="/logo.png"
             alt="NeedMatch"
-            className="h-11 w-auto object-contain"
+            className="h-15 w-auto object-contain"
           />
         </a>
 
