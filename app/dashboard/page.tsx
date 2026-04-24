@@ -2,10 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { useSearchParams } from "next/navigation";
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState("");
+
+  const params = useSearchParams();
+  const loginSuccess = params.get("login");
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -115,6 +119,12 @@ export default function DashboardPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-10">
+        {loginSuccess && (
+          <p className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700">
+            Welcome back! Login successful.
+          </p>
+        )}
+
         <div className="mb-8 rounded-3xl border bg-white p-6 shadow-sm">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl bg-slate-50 p-5">
