@@ -7,17 +7,18 @@ export default function PostNeedPage() {
   const [title, setTitle] = useState("");
   const [budget, setBudget] = useState("");
   const [city, setCity] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async () => {
     if (!title || !budget || !city) {
-      window.alert("Please fill all fields");
+      setMessage("Please fill all fields");
       return;
     }
 
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.alert("Please login first");
+      setMessage("Please login first");
       window.location.href = "/login";
       return;
     }
@@ -32,9 +33,9 @@ export default function PostNeedPage() {
     ]);
 
     if (error) {
-      window.alert(error.message);
+      setMessage(error.message);
     } else {
-      window.alert("Need posted successfully!");
+      setMessage("Need posted successfully!");
       setTitle("");
       setBudget("");
       setCity("");
@@ -44,9 +45,13 @@ export default function PostNeedPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Post Your Need
-        </h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Post Your Need</h2>
+
+        {message && (
+          <p className="mb-4 text-center text-sm text-blue-600">
+            {message}
+          </p>
+        )}
 
         <input
           type="text"
