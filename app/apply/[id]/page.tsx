@@ -12,14 +12,14 @@ export default function ApplyPage() {
   const [bid, setBid] = useState("");
 
   if (!proposal || !bid) {
-  alert("Please fill proposal and bid");
+  console.log("Please fill proposal and bid");
   return;
 }
   const handleApply = async () => {
   const { data: userData } = await supabase.auth.getUser();
 
   if (!userData.user) {
-    alert("Please login first");
+    console.log("Please login first");
     window.location.href = "/login";
     return;
   }
@@ -34,9 +34,9 @@ export default function ApplyPage() {
   ]);
 
   if (error) {
-    alert(error.message);
+    console.log(error.message);
   } else {
-    alert("Application submitted successfully!");
+    console.log("Application submitted successfully!");
     setProposal("");
     setBid("");
   }

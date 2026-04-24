@@ -14,9 +14,9 @@ export default function SignupPage() {
     });
 
     if (error) {
-      alert(error.message);
+      console.log(error.message);
     } else {
-      alert("Signup successful! Check your email.");
+      console.log("Signup successful! Check your email.");
     }
   };
 

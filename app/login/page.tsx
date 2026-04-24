@@ -14,9 +14,9 @@ export default function LoginPage() {
     });
 
     if (error) {
-      alert(error.message);
+      console.log(error.message);
     } else {
-      alert("Login successful!");
+      console.log("Login successful!");
       window.location.href = "/dashboard";
     }
   };

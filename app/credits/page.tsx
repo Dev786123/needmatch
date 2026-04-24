@@ -43,10 +43,10 @@ export default function CreditsPage() {
     ]);
 
     if (error) {
-      alert(error.message);
+      console.log(error.message);
     } else {
       setBalance(newBalance);
-      alert("5 demo credits added!");
+      console.log("5 demo credits added!");
     }
   };
 

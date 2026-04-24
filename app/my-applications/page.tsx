@@ -10,7 +10,7 @@ export default function MyApplicationsPage() {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      alert("Please login first");
+      console.log("Please login first");
       window.location.href = "/login";
       return;
     }
@@ -21,7 +21,7 @@ export default function MyApplicationsPage() {
       .eq("provider_id", userData.user.id);
 
     if (error) {
-      alert(error.message);
+      console.log(error.message);
     } else {
       setApplications(data || []);
     }

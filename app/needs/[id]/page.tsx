@@ -18,7 +18,7 @@ export default function NeedDetailPage() {
       .single();
 
     if (error) {
-      alert(error.message);
+      console.log(error.message);
     } else {
       setNeed(data);
     }

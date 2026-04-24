@@ -39,7 +39,7 @@ export default function ProfilePage() {
     }
   };
   if (!name || !city || !phone) {
-  alert("Please fill name, city and phone");
+  console.log("Please fill name, city and phone");
   return;
 }
 
@@ -47,7 +47,7 @@ export default function ProfilePage() {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      alert("Please login first");
+      console.log("Please login first");
       window.location.href = "/login";
       return;
     }
@@ -67,9 +67,9 @@ export default function ProfilePage() {
     ]);
 
     if (error) {
-      alert(error.message);
+      console.log(error.message);
     } else {
-      alert("Profile saved successfully!");
+      console.log("Profile saved successfully!");
     }
   };
 

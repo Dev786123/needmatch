@@ -13,7 +13,7 @@ export default function MyNeedsPage() {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      alert("Please login first");
+      console.log("Please login first");
       window.location.href = "/login";
       return;
     }
@@ -48,9 +48,9 @@ export default function MyNeedsPage() {
       .eq("id", appId);
 
     if (error) {
-      alert(error.message);
+      console.log(error.message);
     } else {
-      alert(`Application ${status}`);
+      console.log(`Application ${status}`);
       fetchData();
     }
   };
@@ -59,7 +59,7 @@ export default function MyNeedsPage() {
   const { data: userData } = await supabase.auth.getUser();
 
   if (!userData.user) {
-    alert("Please login first");
+    console.log("Please login first");
     window.location.href = "/login";
     return;
   }
@@ -75,7 +75,7 @@ export default function MyNeedsPage() {
 
   // ❌ Not enough credits
   if (currentCredits <= 0) {
-    alert("No credits left! Buy credits first.");
+    console.log("No credits left! Buy credits first.");
     window.location.href = "/credits";
     return;
   }
@@ -87,7 +87,7 @@ export default function MyNeedsPage() {
     .eq("user_id", userData.user.id);
 
   if (creditError) {
-    alert(creditError.message);
+    console.log(creditError.message);
     return;
   }
 
@@ -102,9 +102,9 @@ export default function MyNeedsPage() {
   ]);
 
   if (error) {
-    alert(error.message);
+    console.log(error.message);
   } else {
-    alert("Contact unlocked!");
+    console.log("Contact unlocked!");
     fetchData();
   }
 };
