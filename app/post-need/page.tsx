@@ -14,6 +14,11 @@ export default function PostNeedPage() {
 }
 
   const handleSubmit = async () => {
+  if (!title || !budget || !city) {
+    alert("Please fill all fields");
+    return;
+  }
+
   const { data: userData } = await supabase.auth.getUser();
 
   if (!userData.user) {
