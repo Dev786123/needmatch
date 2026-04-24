@@ -9,24 +9,44 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <a href="/" className="flex items-center gap-2">
-  <img src="/logo.png" alt="NeedMatch" className="h-20 w-auto" />
-</a>
+    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
+        
+        {/* Logo */}
+        <a href="/" className="flex items-center">
+          <img
+            src="/logo.png"
+            alt="NeedMatch"
+            className="h-11 w-auto object-contain"
+          />
+        </a>
 
-        <div className="hidden items-center gap-5 text-sm font-medium text-slate-700 md:flex">
-          <a href="/dashboard" className="hover:text-blue-600">Dashboard</a>
-          <a href="/needs" className="hover:text-blue-600">Needs</a>
-          <a href="/my-needs" className="hover:text-blue-600">My Needs</a>
-          <a href="/my-applications" className="hover:text-blue-600">Applications</a>
-          <a href="/profile" className="hover:text-blue-600">Profile</a>
-          <a href="/credits" className="hover:text-blue-600">Credits</a>
+        {/* Links */}
+        <div className="hidden items-center gap-6 text-sm font-semibold text-slate-700 md:flex">
+          <a href="/dashboard" className="hover:text-blue-600">
+            Dashboard
+          </a>
+          <a href="/needs" className="hover:text-blue-600">
+            Needs
+          </a>
+          <a href="/my-needs" className="hover:text-blue-600">
+            My Needs
+          </a>
+          <a href="/my-applications" className="hover:text-blue-600">
+            Applications
+          </a>
+          <a href="/credits" className="hover:text-blue-600">
+            Credits
+          </a>
+          <a href="/profile" className="hover:text-blue-600">
+            Profile
+          </a>
         </div>
 
+        {/* Action */}
         <button
           onClick={handleLogout}
-          className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+          className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600"
         >
           Logout
         </button>
