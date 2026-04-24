@@ -1,4 +1,19 @@
+"use client";
+
+import { supabase } from "../lib/supabase";
+
 export default function Home() {
+
+  const handleBrowse = async () => {
+    const { data } = await supabase.auth.getUser();
+
+    if (!data.user) {
+      window.location.href = "/login";
+    } else {
+      window.location.href = "/needs";
+    }
+  };
+
   return (
     <main className="min-h-screen bg-slate-50">
       <section className="mx-auto max-w-6xl px-6 py-20">
@@ -21,7 +36,7 @@ export default function Home() {
 
             <div className="mt-8 flex flex-wrap gap-4">
               
-              {/* ✅ Signup button */}
+              {/* Signup */}
               <a
                 href="/signup"
                 className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
@@ -29,18 +44,17 @@ export default function Home() {
                 Get Started
               </a>
 
-              {/* 🔥 FIX: browse needs → login */}
-              <a
-                href="/login"
+              {/* 🔥 Smart Browse Button */}
+              <button
+                onClick={handleBrowse}
                 className="rounded-xl border bg-white px-6 py-3 font-semibold text-slate-800 hover:bg-slate-100"
               >
-                Login to Browse
-              </a>
+                Browse Needs
+              </button>
 
             </div>
           </div>
 
-          {/* RIGHT CARD */}
           <div className="rounded-3xl border bg-white p-6 shadow-xl">
             <div className="rounded-2xl bg-slate-50 p-5">
               <p className="text-sm font-semibold text-blue-600">
@@ -75,7 +89,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FEATURES */}
       <section className="border-y bg-white px-6 py-14">
         <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
 
