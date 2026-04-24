@@ -53,7 +53,6 @@ export default function ApplyPage() {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      setMessage("Please login first");
       window.location.href = "/login";
       return;
     }
@@ -81,48 +80,81 @@ export default function ApplyPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p>Checking application...</p>
+      <main className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-slate-600">Checking application...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Apply to Need</h2>
+    <main className="min-h-screen bg-slate-50">
+      <section className="bg-white border-b px-6 py-10">
+        <div className="max-w-4xl mx-auto">
+          <a href="/needs" className="text-blue-600 font-medium">
+            ← Back to Needs
+          </a>
 
-        {message && (
-          <p className="mb-4 text-center text-sm text-blue-600">{message}</p>
-        )}
+          <h1 className="text-4xl font-bold text-slate-900 mt-4 mb-3">
+            Apply to Need
+          </h1>
 
-        {!alreadyApplied && (
-          <>
-            <textarea
-              placeholder="Write your proposal"
-              className="w-full border p-2 mb-4 rounded h-32"
-              value={proposal}
-              onChange={(e) => setProposal(e.target.value)}
-            />
+          <p className="text-slate-600">
+            Send a clear proposal and bid amount to increase your chances.
+          </p>
+        </div>
+      </section>
 
-            <input
-              type="text"
-              placeholder="Your bid amount"
-              className="w-full border p-2 mb-4 rounded"
-              value={bid}
-              onChange={(e) => setBid(e.target.value)}
-            />
+      <section className="max-w-4xl mx-auto px-6 py-8">
+        <div className="bg-white rounded-2xl shadow-sm border p-6">
+          {message && (
+            <p className="mb-4 text-sm text-blue-600 bg-blue-50 border border-blue-200 p-3 rounded-lg">
+              {message}
+            </p>
+          )}
 
-            <button
-              onClick={handleApply}
-              disabled={submitting}
-              className="w-full bg-blue-600 text-white py-2 rounded"
+          {!alreadyApplied && (
+            <>
+              <label className="block mb-2 font-medium text-slate-700">
+                Your Proposal
+              </label>
+              <textarea
+                placeholder="Example: I can build this website in 5 days with responsive design."
+                className="w-full border p-3 mb-5 rounded-lg h-32"
+                value={proposal}
+                onChange={(e) => setProposal(e.target.value)}
+              />
+
+              <label className="block mb-2 font-medium text-slate-700">
+                Your Bid Amount
+              </label>
+              <input
+                type="text"
+                placeholder="Example: ₹4000"
+                className="w-full border p-3 mb-6 rounded-lg"
+                value={bid}
+                onChange={(e) => setBid(e.target.value)}
+              />
+
+              <button
+                onClick={handleApply}
+                disabled={submitting}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+              >
+                {submitting ? "Submitting..." : "Submit Application"}
+              </button>
+            </>
+          )}
+
+          {alreadyApplied && (
+            <a
+              href="/my-applications"
+              className="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg"
             >
-              {submitting ? "Submitting..." : "Submit Application"}
-            </button>
-          </>
-        )}
-      </div>
+              View My Applications
+            </a>
+          )}
+        </div>
+      </section>
     </main>
   );
 }

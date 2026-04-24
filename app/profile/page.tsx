@@ -27,9 +27,7 @@ export default function ProfilePage() {
       .eq("user_id", userData.user.id)
       .maybeSingle();
 
-    if (error) {
-      setMessage(error.message);
-    }
+    if (error) setMessage(error.message);
 
     if (data) {
       setName(data.name || "");
@@ -52,7 +50,6 @@ export default function ProfilePage() {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      setMessage("Please login first");
       window.location.href = "/login";
       return;
     }
@@ -82,78 +79,98 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p>Loading profile...</p>
+      <main className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-slate-600">Loading profile...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-4 text-center">My Profile</h1>
+    <main className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <section className="bg-white border-b px-6 py-10">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">
+            My Profile
+          </h1>
+          <p className="text-slate-600">
+            Update your details to build trust and get more responses.
+          </p>
+        </div>
+      </section>
 
-        {message && (
-          <p className="mb-4 text-center text-sm text-blue-600">{message}</p>
-        )}
+      {/* Form */}
+      <section className="max-w-4xl mx-auto px-6 py-8">
+        <div className="bg-white rounded-2xl shadow-sm border p-6">
 
-        <input
-          type="text"
-          placeholder="Full Name"
-          className="w-full border p-2 mb-4 rounded"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+          {message && (
+            <p className="mb-4 text-sm text-blue-600 bg-blue-50 border border-blue-200 p-3 rounded-lg">
+              {message}
+            </p>
+          )}
 
-        <select
-          className="w-full border p-2 mb-4 rounded"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-        >
-          <option value="client">Client</option>
-          <option value="provider">Provider</option>
-        </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="Full Name"
+              className="border p-3 rounded-lg"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
 
-        {role === "provider" && (
-          <input
-            type="text"
-            placeholder="Skill e.g. Web Developer"
-            className="w-full border p-2 mb-4 rounded"
-            value={skill}
-            onChange={(e) => setSkill(e.target.value)}
+            <select
+              className="border p-3 rounded-lg"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
+              <option value="client">Client</option>
+              <option value="provider">Provider</option>
+            </select>
+          </div>
+
+          {role === "provider" && (
+            <input
+              type="text"
+              placeholder="Skill (e.g. Web Developer)"
+              className="w-full border p-3 rounded-lg mb-4"
+              value={skill}
+              onChange={(e) => setSkill(e.target.value)}
+            />
+          )}
+
+          <textarea
+            placeholder="Short Bio"
+            className="w-full border p-3 rounded-lg h-28 mb-4"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
           />
-        )}
 
-        <textarea
-          placeholder="Short Bio"
-          className="w-full border p-2 mb-4 rounded h-24"
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-        />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <input
+              type="text"
+              placeholder="City"
+              className="border p-3 rounded-lg"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            />
 
-        <input
-          type="text"
-          placeholder="City"
-          className="w-full border p-2 mb-4 rounded"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-        />
+            <input
+              type="text"
+              placeholder="WhatsApp / Phone"
+              className="border p-3 rounded-lg"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
 
-        <input
-          type="text"
-          placeholder="WhatsApp / Phone"
-          className="w-full border p-2 mb-4 rounded"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
-
-        <button
-          onClick={saveProfile}
-          className="w-full bg-blue-600 text-white py-2 rounded"
-        >
-          Save Profile
-        </button>
-      </div>
+          <button
+            onClick={saveProfile}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+          >
+            Save Profile
+          </button>
+        </div>
+      </section>
     </main>
   );
 }

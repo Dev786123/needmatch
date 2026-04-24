@@ -42,63 +42,115 @@ export default function MyApplicationsPage() {
     return needs.find((need) => need.id === needId);
   };
 
+  const getStatusClass = (status: string) => {
+    if (status === "ACCEPTED") return "bg-green-50 text-green-700 border-green-200";
+    if (status === "REJECTED") return "bg-red-50 text-red-700 border-red-200";
+    return "bg-yellow-50 text-yellow-700 border-yellow-200";
+  };
+
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p>Loading your applications...</p>
+      <main className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-slate-600">Loading your applications...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen p-8 bg-gray-100">
-      <h1 className="text-3xl font-bold mb-6">My Applications</h1>
+    <main className="min-h-screen bg-slate-50">
+      <section className="bg-white border-b px-6 py-10">
+        <div className="max-w-6xl mx-auto">
+          <p className="text-blue-600 font-medium mb-2">Provider Workspace</p>
+          <h1 className="text-4xl font-bold text-slate-900 mb-3">
+            My Applications
+          </h1>
+          <p className="text-slate-600">
+            Track your proposals, bids, and application status in one place.
+          </p>
+        </div>
+      </section>
 
-      {message && (
-        <p className="mb-4 text-sm text-blue-600">{message}</p>
-      )}
+      <section className="max-w-6xl mx-auto px-6 py-8">
+        {message && (
+          <p className="mb-4 text-sm text-blue-600 bg-blue-50 border border-blue-200 p-3 rounded-lg">
+            {message}
+          </p>
+        )}
 
-      {applications.length === 0 && (
-        <p className="text-gray-500">No applications found.</p>
-      )}
-
-      {applications.map((app) => {
-        const need = getNeed(app.need_id);
-
-        return (
-          <div key={app.id} className="bg-white p-4 rounded-lg shadow mb-4">
-            <h2 className="text-xl font-bold mb-2">
-              {need?.title || "Need not found"}
-            </h2>
-
-            <p>
-              <strong>Need ID:</strong> {app.need_id}
+        {applications.length === 0 && (
+          <div className="bg-white rounded-2xl border p-8 text-center">
+            <h2 className="text-xl font-bold mb-2">No applications found</h2>
+            <p className="text-slate-600 mb-4">
+              Browse available needs and submit your first proposal.
             </p>
-
-            <p>
-              <strong>Budget:</strong> {need?.budget || "Not available"}
-            </p>
-
-            <p>
-              <strong>City:</strong> {need?.city || "Not available"}
-            </p>
-
-            <hr className="my-2" />
-
-            <p>
-              <strong>Proposal:</strong> {app.proposal}
-            </p>
-
-            <p>
-              <strong>Bid:</strong> {app.bid}
-            </p>
-
-            <p>
-              <strong>Status:</strong> {app.status || "PENDING"}
-            </p>
+            <a
+              href="/needs"
+              className="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg"
+            >
+              Browse Needs
+            </a>
           </div>
-        );
-      })}
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {applications.map((app) => {
+            const need = getNeed(app.need_id);
+            const status = app.status || "PENDING";
+
+            return (
+              <div
+                key={app.id}
+                className="bg-white rounded-2xl shadow-sm border p-6 hover:shadow-md transition"
+              >
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900">
+                      {need?.title || "Need not found"}
+                    </h2>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Need ID: {app.need_id}
+                    </p>
+                  </div>
+
+                  <span
+                    className={`border text-xs font-medium px-3 py-1 rounded-full ${getStatusClass(
+                      status
+                    )}`}
+                  >
+                    {status}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                  <div className="bg-slate-50 border rounded-xl p-3">
+                    <p className="text-sm text-slate-500">Budget</p>
+                    <p className="font-bold text-slate-900">
+                      {need?.budget || "Not available"}
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-50 border rounded-xl p-3">
+                    <p className="text-sm text-slate-500">City</p>
+                    <p className="font-bold text-slate-900">
+                      {need?.city || "Not available"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 border rounded-xl p-3 mb-3">
+                  <p className="text-sm text-slate-500">Your Proposal</p>
+                  <p className="text-slate-800">{app.proposal}</p>
+                </div>
+
+                <div className="bg-slate-50 border rounded-xl p-3">
+                  <p className="text-sm text-slate-500">Your Bid</p>
+                  <p className="text-slate-900 font-bold">{app.bid}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </main>
   );
 }

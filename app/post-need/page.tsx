@@ -11,7 +11,6 @@ export default function PostNeedPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // 🔒 Route protection
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getUser();
@@ -38,7 +37,6 @@ export default function PostNeedPage() {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      setMessage("Please login first");
       window.location.href = "/login";
       return;
     }
@@ -64,60 +62,79 @@ export default function PostNeedPage() {
     setSubmitting(false);
   };
 
-  // ⏳ Loading screen
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p>Checking login...</p>
+      <main className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-slate-600">Checking login...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Post Your Need
-        </h2>
-
-        {message && (
-          <p className="mb-4 text-center text-sm text-blue-600">
-            {message}
+    <main className="min-h-screen bg-slate-50">
+      <section className="bg-white border-b px-6 py-10">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-blue-600 font-medium mb-2">Client Action</p>
+          <h1 className="text-4xl font-bold text-slate-900 mb-3">
+            Post Your Need
+          </h1>
+          <p className="text-slate-600">
+            Describe your requirement clearly so providers can send better
+            proposals.
           </p>
-        )}
+        </div>
+      </section>
 
-        <input
-          type="text"
-          placeholder="Title"
-          className="w-full border p-2 mb-4 rounded"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+      <section className="max-w-4xl mx-auto px-6 py-8">
+        <div className="bg-white rounded-2xl shadow-sm border p-6">
+          {message && (
+            <p className="mb-4 text-sm text-blue-600 bg-blue-50 border border-blue-200 p-3 rounded-lg">
+              {message}
+            </p>
+          )}
 
-        <input
-          type="text"
-          placeholder="Budget"
-          className="w-full border p-2 mb-4 rounded"
-          value={budget}
-          onChange={(e) => setBudget(e.target.value)}
-        />
+          <label className="block mb-2 font-medium text-slate-700">
+            Need Title
+          </label>
+          <input
+            type="text"
+            placeholder="Example: Need a Shopify website"
+            className="w-full border p-3 mb-5 rounded-lg"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
 
-        <input
-          type="text"
-          placeholder="City"
-          className="w-full border p-2 mb-4 rounded"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-        />
+          <label className="block mb-2 font-medium text-slate-700">
+            Budget
+          </label>
+          <input
+            type="text"
+            placeholder="Example: ₹3000 - ₹5000"
+            className="w-full border p-3 mb-5 rounded-lg"
+            value={budget}
+            onChange={(e) => setBudget(e.target.value)}
+          />
 
-        <button
-          onClick={handleSubmit}
-          disabled={submitting}
-          className="w-full bg-blue-600 text-white py-2 rounded"
-        >
-          {submitting ? "Posting..." : "Post Need"}
-        </button>
-      </div>
+          <label className="block mb-2 font-medium text-slate-700">
+            City
+          </label>
+          <input
+            type="text"
+            placeholder="Example: Surat"
+            className="w-full border p-3 mb-6 rounded-lg"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          />
+
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+          >
+            {submitting ? "Posting..." : "Post Need"}
+          </button>
+        </div>
+      </section>
     </main>
   );
 }
