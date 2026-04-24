@@ -38,40 +38,39 @@ export default function ProfilePage() {
       setPhone(data.phone || "");
     }
   };
-  if (!name || !city || !phone) {
-  console.log("Please fill name, city and phone");
-  return;
-}
 
   const saveProfile = async () => {
-    const { data: userData } = await supabase.auth.getUser();
+  if (!name || !city || !phone) {
+    console.log("Please fill name, city and phone");
+    return;
+  }
 
-    if (!userData.user) {
-      console.log("Please login first");
-      window.location.href = "/login";
-      return;
-    }
+  const { data: userData } = await supabase.auth.getUser();
 
-    const { error } = await supabase.from("profiles").upsert([
-      {
-        user_id: userData.user.id,
-        name,
-        role,
-        skill: role === "provider" ? skill : "",
-        bio: role === "provider" ? bio : "",
-        company_name: role === "client" ? companyName : "",
-        business_type: role === "client" ? businessType : "",
-        city,
-        phone,
-      },
-    ]);
+  if (!userData.user) {
+    console.log("Please login first");
+    window.location.href = "/login";
+    return;
+  }
 
-    if (error) {
-      console.log(error.message);
-    } else {
-      console.log("Profile saved successfully!");
-    }
-  };
+  const { error } = await supabase.from("profiles").upsert([
+    {
+      user_id: userData.user.id,
+      name,
+      role,
+      skill,
+      bio,
+      city,
+      phone,
+    },
+  ]);
+
+  if (error) {
+    console.log(error.message);
+  } else {
+    console.log("Profile saved successfully!");
+  }
+};
 
   useEffect(() => {
     loadProfile();

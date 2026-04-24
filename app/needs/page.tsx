@@ -20,8 +20,16 @@ export default function NeedsPage() {
   };
 
   useEffect(() => {
-    fetchNeeds();
-  }, []);
+  const checkUser = async () => {
+    const { data } = await supabase.auth.getUser();
+
+    if (!data.user) {
+      window.location.href = "/login";
+    }
+  };
+
+  checkUser();
+}, []); 
 
   return (
     <main className="min-h-screen p-8 bg-gray-100">
