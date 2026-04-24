@@ -19,6 +19,7 @@ export default function ProfilePage() {
 
   const loadProfile = async () => {
     setLoading(true);
+    setMessage("");
 
     const { data: userData } = await supabase.auth.getUser();
 
@@ -31,7 +32,7 @@ export default function ProfilePage() {
       .from("profiles")
       .select("*")
       .eq("user_id", userData.user.id)
-      .maybeSingle();
+      .limit(1);
 
     if (error) {
       setMessage(error.message);
@@ -39,16 +40,20 @@ export default function ProfilePage() {
       return;
     }
 
-    if (data) {
-      setProfile(data);
-      setName(data.name || "");
-      setRole(data.role || "provider");
-      setSkill(data.skill || "");
-      setBio(data.bio || "");
-      setCity(data.city || "");
-      setPhone(data.phone || "");
+    const userProfile = data && data.length > 0 ? data[0] : null;
 
-      const isComplete = data.name && data.city && data.phone;
+    if (userProfile) {
+      setProfile(userProfile);
+      setName(userProfile.name || "");
+      setRole(userProfile.role || "provider");
+      setSkill(userProfile.skill || "");
+      setBio(userProfile.bio || "");
+      setCity(userProfile.city || "");
+      setPhone(userProfile.phone || "");
+
+      const isComplete =
+        userProfile.name && userProfile.city && userProfile.phone;
+
       setEditMode(!isComplete);
     } else {
       setProfile(null);
@@ -87,11 +92,11 @@ export default function ProfilePage() {
 
     let error;
 
-    if (profile?.id) {
+    if (profile) {
       const result = await supabase
         .from("profiles")
         .update(profileData)
-        .eq("id", profile.id);
+        .eq("user_id", userData.user.id);
 
       error = result.error;
     } else {
