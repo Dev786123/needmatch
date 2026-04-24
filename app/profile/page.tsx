@@ -33,7 +33,6 @@ export default function ProfilePage() {
 
     if (data) {
       setProfile(data);
-
       setName(data.name || "");
       setRole(data.role || "provider");
       setSkill(data.skill || "");
@@ -41,9 +40,10 @@ export default function ProfilePage() {
       setCity(data.city || "");
       setPhone(data.phone || "");
 
-      setEditMode(false); // show view mode
+      const isComplete = data.name && data.city && data.phone;
+      setEditMode(!isComplete);
     } else {
-      setEditMode(true); // first time → open form
+      setEditMode(true);
     }
 
     setLoading(false);
@@ -51,22 +51,25 @@ export default function ProfilePage() {
 
   const saveProfile = async () => {
     if (!name || !city || !phone) {
-      setMessage("Please fill required fields");
+      setMessage("Please fill name, city and phone");
       return;
     }
 
-const { data: userData } = await supabase.auth.getUser();
+    const { data: userData } = await supabase.auth.getUser();
 
-if (!userData?.user) {
-  setMessage("User not found. Please login again.");
-  return;
-} 
+    if (!userData?.user) {
+      setMessage("User not found. Please login again.");
+      return;
+    }
+
+    const finalRole = profile?.role || role;
+
     const { error } = await supabase.from("profiles").upsert([
       {
         user_id: userData.user.id,
         name,
-        role,
-        skill: role === "provider" ? skill : "",
+        role: finalRole,
+        skill: finalRole === "provider" ? skill : "",
         bio,
         city,
         phone,
@@ -76,8 +79,9 @@ if (!userData?.user) {
     if (error) {
       setMessage(error.message);
     } else {
-      setMessage("Profile saved!");
-      loadProfile(); // reload and switch to view mode
+      setMessage("Profile saved successfully!");
+      await loadProfile();
+      setEditMode(false);
     }
   };
 
@@ -88,109 +92,179 @@ if (!userData?.user) {
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-slate-50">
-        Loading...
+        <p className="text-slate-600">Loading profile...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 flex justify-center p-6">
-      <div className="bg-white p-8 rounded-2xl shadow w-full max-w-md">
-
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          My Profile
-        </h1>
-
-        {message && (
-          <p className="mb-4 text-sm text-blue-600 text-center">
-            {message}
+    <main className="min-h-screen bg-slate-50 px-6 py-10">
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-6">
+          <h1 className="text-4xl font-black text-slate-950">My Profile</h1>
+          <p className="mt-2 text-slate-600">
+            Manage your public details. Your role is fixed from signup.
           </p>
-        )}
+        </div>
 
-        {/* 🔥 VIEW MODE */}
-        {!editMode && profile && (
-          <>
-            <p><strong>Name:</strong> {profile.name}</p>
-            <p><strong>Role:</strong> {profile.role}</p>
+        <div className="rounded-3xl border bg-white p-8 shadow-sm">
+          {message && (
+            <p className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700">
+              {message}
+            </p>
+          )}
 
-            {profile.role === "provider" && (
-              <p><strong>Skill:</strong> {profile.skill}</p>
-            )}
+          {!editMode && profile && (
+            <>
+              <div className="mb-6 flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-black text-slate-950">
+                    {profile.name || "No name added"}
+                  </h2>
+                  <p className="mt-1 capitalize text-slate-600">
+                    {profile.role}
+                  </p>
+                </div>
 
-            <p><strong>Bio:</strong> {profile.bio}</p>
-            <p><strong>City:</strong> {profile.city}</p>
-            <p><strong>Phone:</strong> {profile.phone}</p>
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="rounded-xl bg-blue-600 px-5 py-2 font-bold text-white hover:bg-blue-700"
+                >
+                  Edit Profile
+                </button>
+              </div>
 
-            <button
-              onClick={() => setEditMode(true)}
-              className="mt-6 w-full bg-blue-600 text-white py-2 rounded"
-            >
-              Edit Profile
-            </button>
-          </>
-        )}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-sm text-slate-500">Role</p>
+                  <p className="mt-1 font-bold capitalize text-slate-950">
+                    {profile.role}
+                  </p>
+                </div>
 
-        {/* 🔥 EDIT MODE */}
-        {editMode && (
-          <>
-            <input
-              type="text"
-              placeholder="Full Name"
-              className="w-full border p-2 mb-3 rounded"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+                {profile.role === "provider" && (
+                  <div className="rounded-2xl bg-slate-50 p-4">
+                    <p className="text-sm text-slate-500">Skill</p>
+                    <p className="mt-1 font-bold text-slate-950">
+                      {profile.skill || "Not added"}
+                    </p>
+                  </div>
+                )}
 
-            <select
-              className="w-full border p-2 mb-3 rounded"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            >
-              <option value="client">Client</option>
-              <option value="provider">Provider</option>
-            </select>
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-sm text-slate-500">City</p>
+                  <p className="mt-1 font-bold text-slate-950">
+                    {profile.city || "Not added"}
+                  </p>
+                </div>
 
-            {role === "provider" && (
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-sm text-slate-500">Phone</p>
+                  <p className="mt-1 font-bold text-slate-950">
+                    {profile.phone || "Not added"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-2xl bg-slate-50 p-4">
+                <p className="text-sm text-slate-500">Bio</p>
+                <p className="mt-1 text-slate-800">
+                  {profile.bio || "Not added"}
+                </p>
+              </div>
+            </>
+          )}
+
+          {editMode && (
+            <>
+              <div className="mb-5 rounded-2xl bg-slate-50 p-4">
+                <p className="text-sm text-slate-500">Role</p>
+                <p className="mt-1 font-bold capitalize text-slate-950">
+                  {role}
+                </p>
+              </div>
+
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Full Name
+              </label>
               <input
                 type="text"
-                placeholder="Skill"
-                className="w-full border p-2 mb-3 rounded"
-                value={skill}
-                onChange={(e) => setSkill(e.target.value)}
+                placeholder="Full Name"
+                className="mb-4 w-full rounded-xl border border-slate-300 p-3 outline-none focus:border-blue-500"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
-            )}
 
-            <textarea
-              placeholder="Bio"
-              className="w-full border p-2 mb-3 rounded"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-            />
+              {role === "provider" && (
+                <>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    Skill
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Example: Web Developer"
+                    className="mb-4 w-full rounded-xl border border-slate-300 p-3 outline-none focus:border-blue-500"
+                    value={skill}
+                    onChange={(e) => setSkill(e.target.value)}
+                  />
+                </>
+              )}
 
-            <input
-              type="text"
-              placeholder="City"
-              className="w-full border p-2 mb-3 rounded"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            />
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Bio
+              </label>
+              <textarea
+                placeholder="Short bio"
+                className="mb-4 h-28 w-full rounded-xl border border-slate-300 p-3 outline-none focus:border-blue-500"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+              />
 
-            <input
-              type="text"
-              placeholder="Phone"
-              className="w-full border p-2 mb-4 rounded"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                City
+              </label>
+              <input
+                type="text"
+                placeholder="City"
+                className="mb-4 w-full rounded-xl border border-slate-300 p-3 outline-none focus:border-blue-500"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
 
-            <button
-              onClick={saveProfile}
-              className="w-full bg-green-600 text-white py-2 rounded"
-            >
-              Save Profile
-            </button>
-          </>
-        )}
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Phone
+              </label>
+              <input
+                type="text"
+                placeholder="Phone"
+                className="mb-6 w-full rounded-xl border border-slate-300 p-3 outline-none focus:border-blue-500"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+
+              <div className="flex gap-3">
+                <button
+                  onClick={saveProfile}
+                  className="flex-1 rounded-xl bg-green-600 py-3 font-bold text-white hover:bg-green-700"
+                >
+                  Save Profile
+                </button>
+
+                {profile && (
+                  <button
+                    onClick={() => {
+                      setEditMode(false);
+                      setMessage("");
+                    }}
+                    className="rounded-xl border px-5 py-3 font-bold text-slate-700 hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </main>
   );
