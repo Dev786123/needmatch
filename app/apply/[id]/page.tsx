@@ -95,7 +95,7 @@ export default function ApplyPage() {
   const handleApply = async () => {
     setMessage("");
 
-    if (!proposal || !price) {
+    if (!proposal.trim() || !price.trim()) {
       setMessage("Please fill proposal and price");
       return;
     }
@@ -111,7 +111,7 @@ export default function ApplyPage() {
 
     const { data: profileRows } = await supabase
       .from("profiles")
-      .select("role")
+      .select("*")
       .eq("user_id", userData.user.id)
       .limit(1);
 
@@ -137,20 +137,61 @@ export default function ApplyPage() {
       return;
     }
 
-    const { error } = await supabase.from("applications").insert([
-      {
-        need_id: needId,
-        proposal,
-        price,
-        provider_id: userData.user.id,
-        status: "pending",
-      },
-    ]);
+    const { data: insertedRows, error } = await supabase
+      .from("applications")
+      .insert([
+        {
+          need_id: needId,
+          proposal,
+          price,
+          provider_id: userData.user.id,
+          status: "pending",
+          ai_score: null,
+          ai_reason: "AI score not available",
+        },
+      ])
+      .select("id")
+      .limit(1);
 
     if (error) {
       setMessage(error.message);
       setSubmitting(false);
       return;
+    }
+
+    const applicationId =
+      insertedRows && insertedRows.length > 0 ? insertedRows[0].id : null;
+
+    try {
+      if (applicationId) {
+        const aiResponse = await fetch("/api/ai-match", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            needTitle: need?.title || "",
+            needBudget: need?.budget || "",
+            needCity: need?.city || "",
+            providerSkill: profile?.skill || "",
+            providerBio: profile?.bio || "",
+            proposal,
+            bid: price,
+          }),
+        });
+
+        const aiData = await aiResponse.json();
+
+        await supabase
+          .from("applications")
+          .update({
+            ai_score: aiData?.ai_score ?? null,
+            ai_reason: aiData?.ai_reason || "AI score not available",
+          })
+          .eq("id", applicationId);
+      }
+    } catch (aiError) {
+      console.log("AI match failed:", aiError);
     }
 
     setMessage("Application submitted successfully!");
@@ -257,7 +298,9 @@ export default function ApplyPage() {
                 disabled={submitting}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
               >
-                {submitting ? "Submitting..." : "Submit Application"}
+                {submitting
+                  ? "Submitting and generating AI score..."
+                  : "Submit Application"}
               </button>
             </>
           )}
