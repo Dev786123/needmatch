@@ -42,13 +42,13 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
-      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
+    <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md">
+      <div className="mx-auto flex h-24 max-w-6xl items-center justify-between px-6">
         <a href="/" className="flex items-center">
           <img
             src="/logo.png"
             alt="NeedMatch"
-            className="h-14 w-auto object-contain"
+            className="h-16 w-auto object-contain"
           />
         </a>
 
@@ -63,11 +63,9 @@ export default function Navbar() {
                 <a href="/post-need" className="hover:text-blue-600">
                   Post Need
                 </a>
-
                 <a href="/my-needs" className="hover:text-blue-600">
                   My Needs
                 </a>
-
                 <a href="/credits" className="hover:text-blue-600">
                   Credits
                 </a>
@@ -79,7 +77,6 @@ export default function Navbar() {
                 <a href="/needs" className="hover:text-blue-600">
                   Browse Needs
                 </a>
-
                 <a href="/my-applications" className="hover:text-blue-600">
                   My Applications
                 </a>
@@ -95,14 +92,14 @@ export default function Navbar() {
         {!loading && loggedIn ? (
           <button
             onClick={handleLogout}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600"
+            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white hover:bg-blue-600"
           >
             Logout
           </button>
         ) : (
           <a
             href="/login"
-            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white hover:bg-blue-700"
           >
             Login
           </a>
