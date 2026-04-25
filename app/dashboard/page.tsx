@@ -41,13 +41,11 @@ export default function DashboardPage() {
           ])
           .select("*");
 
-        profile =
-          newProfile && newProfile.length > 0 ? newProfile[0] : null;
+        profile = newProfile && newProfile.length > 0 ? newProfile[0] : null;
       }
 
       const userRole = profile?.role || "provider";
-      const isProfileComplete =
-        profile?.name && profile?.city && profile?.phone;
+      const isProfileComplete = profile?.name && profile?.city && profile?.phone;
 
       setRole(userRole);
       setName(profile?.name || "there");
@@ -76,14 +74,14 @@ export default function DashboardPage() {
     },
     {
       title: "My Needs",
-      desc: "Manage posted needs, applicants, and contact unlocks.",
+      desc: "Review applicants, accept/reject, unlock contact, and close needs.",
       href: "/my-needs",
       icon: "📌",
-      cta: "Manage",
+      cta: "Manage needs",
     },
     {
       title: "Credits",
-      desc: "Use credits to unlock provider contact details.",
+      desc: "Buy/use credits to unlock provider contact details.",
       href: "/credits",
       icon: "💳",
       cta: "View credits",
@@ -92,25 +90,25 @@ export default function DashboardPage() {
 
   const providerCards = [
     {
-      title: "Browse Needs",
-      desc: "Find active client requirements and apply with proposals.",
+      title: "Browse Open Needs",
+      desc: "See only open client requirements available for providers.",
       href: "/needs",
       icon: "🔍",
-      cta: "Browse work",
+      cta: "Browse open needs",
+    },
+    {
+      title: "Need Detail → Apply",
+      desc: "Open a need, read details, then submit proposal and price.",
+      href: "/needs",
+      icon: "📄",
+      cta: "View details",
     },
     {
       title: "My Applications",
-      desc: "Track your submitted proposals and application status.",
+      desc: "Track pending, accepted, or rejected application status.",
       href: "/my-applications",
       icon: "📨",
-      cta: "Track",
-    },
-    {
-      title: "My Profile",
-      desc: "Update your skills, bio, city, and contact details.",
-      href: "/profile",
-      icon: "👤",
-      cta: "Update",
+      cta: "Check status",
     },
   ];
 
@@ -148,9 +146,6 @@ export default function DashboardPage() {
       )}
 
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 px-6 py-16 text-white">
-        <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-blue-300/20 blur-3xl"></div>
-
         <div className="relative mx-auto max-w-6xl">
           {loginSuccess && (
             <p className="mb-6 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-blue-50">
@@ -169,8 +164,8 @@ export default function DashboardPage() {
 
           <p className="mt-5 max-w-2xl text-lg text-blue-100">
             {role === "client"
-              ? "Post your need, review providers, and unlock the right contact when you are ready."
-              : "Browse real client needs, apply with a clear proposal, and track your applications."}
+              ? "Post your need, review providers, unlock contacts, and close completed needs."
+              : "Browse open needs, check details, apply once, and track your application status."}
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -182,10 +177,10 @@ export default function DashboardPage() {
             </a>
 
             <a
-              href="/profile"
+              href={role === "client" ? "/my-needs" : "/my-applications"}
               className="rounded-xl border border-white/30 px-6 py-3 font-bold text-white hover:bg-white/10"
             >
-              Complete Profile
+              {role === "client" ? "Manage Needs" : "My Applications"}
             </a>
           </div>
         </div>
@@ -203,33 +198,33 @@ export default function DashboardPage() {
           <div className="rounded-3xl border bg-white p-6 shadow-sm">
             <p className="text-sm font-medium text-slate-500">Main Flow</p>
             <h2 className="mt-2 text-3xl font-black text-slate-950">
-              {role === "client" ? "Post → Review" : "Browse → Apply"}
+              {role === "client"
+                ? "Post → Review → Unlock"
+                : "Browse → Detail → Apply"}
             </h2>
           </div>
 
           <div className="rounded-3xl border bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Next Action</p>
+            <p className="text-sm font-medium text-slate-500">Status Flow</p>
             <h2 className="mt-2 text-3xl font-black text-slate-950">
-              {role === "client" ? "Post Need" : "Apply Now"}
+              {role === "client" ? "Accept / Reject" : "Track Status"}
             </h2>
           </div>
         </div>
 
-        <div className="mb-6 flex items-end justify-between">
-          <div>
-            <h2 className="text-3xl font-black text-slate-950">
-              Quick Actions
-            </h2>
-            <p className="mt-1 text-slate-600">
-              Start with the most important actions for your role.
-            </p>
-          </div>
+        <div className="mb-6">
+          <h2 className="text-3xl font-black text-slate-950">Quick Actions</h2>
+          <p className="mt-1 text-slate-600">
+            {role === "client"
+              ? "Client flow: Post Need → My Needs → Unlock Contact → Close Need."
+              : "Provider flow: Browse Needs → Need Detail → Apply → My Applications → Status."}
+          </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {cards.map((card) => (
             <a
-              key={card.href}
+              key={card.title}
               href={card.href}
               className="group rounded-3xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
             >
